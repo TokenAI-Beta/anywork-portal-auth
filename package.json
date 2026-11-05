@@ -1,0 +1,50 @@
+{
+  "name": "anywork-portal-auth",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Anywork 门户登录 / desk_session / 角色闸 / 门户后页 / 进入工作台 / 日历（DSH Web 插件 · 壳 v0）",
+  "license": "MIT",
+  "type": "module",
+  "engines": {
+    "node": ">=20",
+    "dsh": ">=0.2.1-rc.3 <0.3.0"
+  },
+  "main": "lib/index.js",
+  "exports": {
+    ".": "./lib/index.js",
+    "./client": "./lib/client.js",
+    "./cordis.patch.yml": "./cordis.patch.yml",
+    "./icon": "./icon.svg",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "lib/index.js",
+    "lib/client.js",
+    "cordis.patch.yml",
+    "icon.svg",
+    "README.md",
+    "demo"
+  ],
+  "peerDependencies": {
+    "@deepseek-ai/cordis": "^4.0.1"
+  },
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    },
+    "client": {
+      "inject": [
+        "@deepseek-ai/dsh-client-ui-slots",
+        "@deepseek-ai/dsh-client-ui-sidebar"
+      ],
+      "platform": "web"
+    }
+  },
+  "scripts": {
+    "demo": "echo Open demo/index.html in a browser (file:// or static serve)"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/TokenAI-Beta/anywork-portal-auth.git"
+  }
+}

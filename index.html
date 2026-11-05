@@ -1,0 +1,1838 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Portal Auth</title>
+  <style>
+    :root {
+      --bg: #0a0a0b;
+      --bg-elev: #111113;
+      --bg-soft: #161618;
+      --border: #232326;
+      --border-strong: #2e2e32;
+      --text: #ececee;
+      --muted: #8b8b93;
+      --faint: #5c5c66;
+      --ok: #3dd68c;
+      --deny: #f07178;
+      --deny-bg: #2a1215;
+      --ok-bg: #0f2a1c;
+      --radius: 12px;
+      --font: "Inter", "Segoe UI", system-ui, -apple-system, sans-serif;
+      --mono: ui-monospace, "SF Mono", Consolas, monospace;
+    }
+    * { box-sizing: border-box; }
+    html, body { height: 100%; }
+    body {
+      margin: 0;
+      font-family: var(--font);
+      background: var(--bg);
+      color: var(--text);
+      -webkit-font-smoothing: antialiased;
+    }
+    .stage {
+      min-height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 32px 20px;
+    }
+    .stage.app-mode {
+      align-items: stretch;
+      padding: 0;
+    }
+    .shell { width: 100%; max-width: 420px; }
+    .shell.app { max-width: none; height: 100%; display: flex; flex-direction: column; }
+    .brand { text-align: center; margin-bottom: 28px; }
+    .brand .mark {
+      width: 36px; height: 36px; margin: 0 auto 14px; border-radius: 9px;
+      background: linear-gradient(145deg, #2a2a30, #121214);
+      border: 1px solid var(--border-strong);
+      display: grid; place-items: center;
+      color: var(--muted); font-size: 13px; font-weight: 600;
+    }
+    .brand h1 { margin: 0; font-size: 1.125rem; font-weight: 560; letter-spacing: -0.02em; }
+    .brand p { margin: 6px 0 0; color: var(--muted); font-size: 0.875rem; }
+    .card {
+      background: var(--bg-elev); border: 1px solid var(--border); border-radius: var(--radius);
+      padding: 28px 28px 24px;
+      box-shadow: 0 0 0 1px #ffffff05 inset, 0 24px 48px -24px #000000aa;
+    }
+    .field { margin-top: 14px; }
+    .field:first-of-type { margin-top: 0; }
+    label { display: block; font-size: 0.78rem; font-weight: 500; color: var(--muted); margin-bottom: 6px; }
+    input {
+      width: 100%; padding: 10px 12px; border-radius: 8px;
+      border: 1px solid var(--border-strong); background: var(--bg); color: var(--text);
+      font-size: 0.925rem; outline: none;
+    }
+    input::placeholder { color: var(--faint); }
+    input:focus { border-color: #3d3d78; box-shadow: 0 0 0 3px #5e6ad222; }
+    .actions { display: flex; gap: 8px; margin-top: 18px; flex-wrap: wrap; }
+    button {
+      cursor: pointer; font-family: inherit; font-size: 0.875rem; font-weight: 500;
+      border-radius: 8px; padding: 9px 14px;
+      border: 1px solid var(--border-strong); background: var(--bg-soft); color: var(--text);
+    }
+    button:hover { background: #1c1c20; }
+    button.primary { background: var(--text); color: #0a0a0b; border-color: transparent; flex: 1; }
+    button.primary:hover { background: #f5f5f7; }
+    button.ghost { background: transparent; color: var(--muted); border-color: transparent; }
+    button.ghost:hover { color: var(--text); background: #1c1c1f; }
+    button.danger { background: transparent; color: var(--deny); border-color: #3a1a1e; }
+    button.danger:hover { background: var(--deny-bg); }
+    button.sm { padding: 6px 10px; font-size: 0.78rem; }
+    .err { min-height: 1.2em; margin-top: 12px; font-size: 0.8125rem; color: var(--deny); }
+    .hint-line {
+      margin-top: 18px; padding-top: 16px; border-top: 1px solid var(--border);
+      font-size: 0.75rem; color: var(--faint); line-height: 1.5; text-align: center;
+    }
+    .hint-line code {
+      font-family: var(--mono); font-size: 0.72rem; color: var(--muted);
+      background: var(--bg); padding: 1px 5px; border-radius: 4px; border: 1px solid var(--border);
+    }
+    .hidden { display: none !important; }
+    .foot { margin-top: 20px; text-align: center; font-size: 0.7rem; color: var(--faint); }
+
+    /* App shell */
+    .topbar {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 12px 20px; border-bottom: 1px solid var(--border); background: var(--bg-elev);
+      flex-shrink: 0;
+    }
+    .topbar .left { display: flex; align-items: center; gap: 12px; min-width: 0; }
+    .topbar .logo {
+      width: 28px; height: 28px; border-radius: 7px; border: 1px solid var(--border-strong);
+      background: #161618; display: grid; place-items: center;
+      font-size: 11px; font-weight: 650; color: var(--muted);
+    }
+    .topbar .title { font-size: 0.9rem; font-weight: 550; letter-spacing: -0.01em; }
+    .topbar .sub { font-size: 0.75rem; color: var(--faint); }
+    .who { display: flex; align-items: center; gap: 10px; }
+    .pill {
+      display: inline-flex; align-items: center; height: 22px; padding: 0 8px;
+      border-radius: 999px; font-size: 0.7rem; font-weight: 560; border: 1px solid var(--border);
+      color: var(--muted); background: var(--bg);
+    }
+    .pill.admin { color: #b4b4ff; border-color: #2c2c55; background: #141428; }
+    .pill.member { color: #7dcea0; border-color: #1e3a2c; background: #0f1c15; }
+
+    .layout {
+      flex: 1; display: grid; grid-template-columns: 200px 1fr; min-height: 0;
+    }
+    @media (max-width: 720px) {
+      .layout { grid-template-columns: 1fr; }
+      .nav { flex-direction: row; overflow-x: auto; border-right: none; border-bottom: 1px solid var(--border); }
+    }
+    .nav {
+      background: var(--bg-elev); border-right: 1px solid var(--border);
+      padding: 14px 10px; display: flex; flex-direction: column; gap: 2px;
+    }
+    .nav button {
+      text-align: left; border: none; background: transparent; color: var(--muted);
+      padding: 9px 12px; border-radius: 8px; font-size: 0.84rem; width: 100%;
+    }
+    .nav button:hover { background: #1a1a1e; color: var(--text); }
+    .nav button.active { background: #1c1c22; color: var(--text); }
+    .nav button:disabled { opacity: 0.35; cursor: not-allowed; }
+    .nav .nav-hint {
+      margin-top: auto; padding: 10px 12px; font-size: 0.7rem; color: var(--faint); line-height: 1.4;
+    }
+
+    .main { padding: 20px 22px 28px; overflow: auto; background: var(--bg); }
+    .main h2 {
+      margin: 0 0 4px; font-size: 1.05rem; font-weight: 560; letter-spacing: -0.02em;
+    }
+    .main .lede { margin: 0 0 18px; color: var(--muted); font-size: 0.84rem; }
+
+    .stats {
+      display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 16px;
+    }
+    @media (max-width: 900px) { .stats { grid-template-columns: repeat(2, 1fr); } }
+    .stat {
+      background: var(--bg-elev); border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px;
+    }
+    .stat .k { font-size: 0.72rem; color: var(--faint); text-transform: uppercase; letter-spacing: 0.04em; }
+    .stat .v { margin-top: 6px; font-size: 1.35rem; font-weight: 560; letter-spacing: -0.03em; }
+    .stat .s { margin-top: 4px; font-size: 0.75rem; color: var(--muted); }
+
+    .panel {
+      background: var(--bg-elev); border: 1px solid var(--border); border-radius: var(--radius);
+      padding: 16px 18px; margin-top: 12px;
+    }
+    .panel h3 {
+      margin: 0 0 12px; font-size: 0.78rem; font-weight: 550; color: var(--muted);
+      letter-spacing: 0.04em; text-transform: uppercase;
+    }
+    table { width: 100%; border-collapse: collapse; font-size: 0.84rem; }
+    th, td { text-align: left; padding: 9px 8px; border-bottom: 1px solid var(--border); }
+    th { color: var(--faint); font-weight: 500; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.03em; }
+    tr:last-child td { border-bottom: none; }
+    .tag {
+      display: inline-flex; padding: 2px 7px; border-radius: 999px; font-size: 0.7rem;
+      border: 1px solid var(--border); color: var(--muted);
+    }
+    .tag.on { color: var(--ok); border-color: #1e3a2c; background: var(--ok-bg); }
+    .tag.off { color: var(--deny); border-color: #3a1a1e; background: var(--deny-bg); }
+    .tag.wait { color: #e6c07b; border-color: #3a3220; background: #1f1a10; }
+
+    pre.session {
+      margin: 0; padding: 12px 14px; background: var(--bg); border: 1px solid var(--border);
+      border-radius: 8px; overflow: auto; font-family: var(--mono); font-size: 0.75rem;
+      line-height: 1.55; color: #c8c8d0;
+    }
+    .announce-item {
+      padding: 12px 0; border-bottom: 1px solid var(--border);
+    }
+    .announce-item:last-child { border-bottom: none; }
+    .announce-item .t { font-size: 0.9rem; font-weight: 550; }
+    .announce-item .m { margin-top: 4px; font-size: 0.8rem; color: var(--muted); line-height: 1.45; }
+    .announce-item .d { margin-top: 6px; font-size: 0.72rem; color: var(--faint); }
+
+    .gate-box {
+      border: 1px solid var(--border); border-radius: 10px; padding: 16px; background: var(--bg);
+    }
+    .gate-box.locked {
+      border-color: #3a1a1e; background: var(--deny-bg);
+    }
+    .gate-box .status { margin-top: 10px; font-size: 0.84rem; }
+    .status .ok { color: var(--ok); }
+    .status .no { color: var(--deny); }
+
+    .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    @media (max-width: 720px) { .grid2 { grid-template-columns: 1fr; } }
+
+    .member-banner {
+      margin-bottom: 16px; padding: 12px 14px; border-radius: 10px;
+      border: 1px solid #2c2c55; background: #141428; color: #b4b4ff; font-size: 0.84rem;
+    }
+    .member-banner.member {
+      border-color: #1e3a2c; background: #0f1c15; color: #7dcea0;
+    }
+
+    .row-actions { display: flex; gap: 6px; flex-wrap: wrap; }
+    .tag.boot { color: #e6c07b; border-color: #3a3220; background: #1f1a10; }
+    .mono { font-family: var(--mono); font-size: 0.78rem; color: var(--muted); }
+    .members-toolbar {
+      display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-bottom: 12px;
+    }
+    .members-toolbar input {
+      width: auto; min-width: 140px; padding: 8px 10px; font-size: 0.84rem;
+    }
+    .members-note { margin-top: 10px; font-size: 0.75rem; color: var(--faint); }
+
+    .charts {
+      display: grid; grid-template-columns: 1.4fr 1fr; gap: 12px; margin-bottom: 4px;
+    }
+    @media (max-width: 900px) { .charts { grid-template-columns: 1fr; } }
+    .chart-panel {
+      background: var(--bg-elev); border: 1px solid var(--border); border-radius: var(--radius);
+      padding: 16px 18px;
+    }
+    .chart-panel h3 {
+      margin: 0 0 10px; font-size: 0.78rem; font-weight: 550; color: var(--muted);
+      letter-spacing: 0.04em; text-transform: uppercase;
+    }
+    .chart-svg { width: 100%; height: auto; display: block; }
+    .chart-legend {
+      display: flex; flex-wrap: wrap; gap: 12px; margin-top: 10px;
+      font-size: 0.72rem; color: var(--muted);
+    }
+    .chart-legend span { display: inline-flex; align-items: center; gap: 6px; }
+    .swatch {
+      width: 8px; height: 8px; border-radius: 2px; display: inline-block;
+    }
+
+    /* Workbench mock (seat desktop placeholder) */
+    .btn-enter-wb {
+      background: #5e6ad2; color: #fff; border-color: transparent;
+      font-weight: 560; padding: 7px 12px; font-size: 0.8rem;
+    }
+    .btn-enter-wb:hover { background: #6e78e0; color: #fff; }
+    .wb-enter-card {
+      margin-top: 14px; padding: 18px 18px; border-radius: var(--radius);
+      border: 1px solid #2c2c55; background: linear-gradient(160deg, #141428 0%, #111113 70%);
+      display: flex; align-items: center; justify-content: space-between; gap: 14px; flex-wrap: wrap;
+    }
+    .wb-enter-card .wb-copy { min-width: 0; }
+    .wb-enter-card .wb-k { font-size: 0.9rem; font-weight: 560; color: #c8caff; }
+    .wb-enter-card .wb-s { margin-top: 4px; font-size: 0.78rem; color: var(--muted); line-height: 1.4; }
+    #workbench-view {
+      flex: 1; display: flex; flex-direction: column; min-height: 0; background: var(--bg);
+    }
+    .wb-bar {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 12px 20px; border-bottom: 1px solid var(--border); background: var(--bg-elev); flex-shrink: 0;
+    }
+    .wb-bar .wb-title { font-size: 0.95rem; font-weight: 560; letter-spacing: -0.01em; }
+    .wb-bar .wb-sub { font-size: 0.75rem; color: var(--faint); margin-top: 2px; }
+    .wb-body {
+      flex: 1; display: grid; grid-template-columns: 220px 1fr; min-height: 0;
+    }
+    @media (max-width: 720px) { .wb-body { grid-template-columns: 1fr; } }
+    .wb-rail {
+      border-right: 1px solid var(--border); background: var(--bg-elev);
+      padding: 14px 12px; overflow: auto;
+    }
+    .wb-rail h3 {
+      margin: 0 0 10px; font-size: 0.72rem; font-weight: 550; color: var(--faint);
+      letter-spacing: 0.04em; text-transform: uppercase; padding: 0 6px;
+    }
+    .wb-chat-item {
+      padding: 10px 10px; border-radius: 8px; margin-bottom: 4px; cursor: default;
+    }
+    .wb-chat-item.active { background: #1c1c22; }
+    .wb-chat-item .n { font-size: 0.84rem; font-weight: 520; }
+    .wb-chat-item .p { margin-top: 3px; font-size: 0.72rem; color: var(--faint); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .wb-main { padding: 28px 28px 36px; overflow: auto; display: flex; flex-direction: column; gap: 16px; }
+    .wb-welcome {
+      max-width: 560px; margin: 24px auto 0; text-align: center;
+      padding: 28px 24px; border: 1px solid var(--border); border-radius: var(--radius);
+      background: var(--bg-elev);
+    }
+    .wb-welcome .mark {
+      width: 44px; height: 44px; margin: 0 auto 14px; border-radius: 10px;
+      border: 1px solid var(--border-strong); background: #161618;
+      display: grid; place-items: center; color: #8b93ff; font-weight: 650; font-size: 13px;
+    }
+    .wb-welcome h2 { margin: 0; font-size: 1.15rem; font-weight: 560; letter-spacing: -0.02em; }
+    .wb-welcome p { margin: 8px 0 0; color: var(--muted); font-size: 0.86rem; line-height: 1.5; }
+    .wb-fake-thread {
+      max-width: 640px; margin: 0 auto; width: 100%;
+      border: 1px solid var(--border); border-radius: var(--radius); background: var(--bg-elev);
+      padding: 16px 18px;
+    }
+    .wb-msg { display: flex; gap: 10px; margin-bottom: 14px; }
+    .wb-msg:last-child { margin-bottom: 0; }
+    .wb-av {
+      width: 28px; height: 28px; border-radius: 8px; flex-shrink: 0;
+      background: #1c1c22; border: 1px solid var(--border); display: grid; place-items: center;
+      font-size: 0.65rem; color: var(--muted); font-weight: 600;
+    }
+    .wb-bubble .who { font-size: 0.75rem; color: var(--faint); margin-bottom: 3px; }
+    .wb-bubble .txt { font-size: 0.88rem; line-height: 1.45; color: var(--text); }
+    .wb-composer {
+      max-width: 640px; margin: 0 auto; width: 100%;
+      display: flex; gap: 8px; align-items: center;
+      padding: 10px 12px; border: 1px solid var(--border); border-radius: 10px; background: var(--bg-elev);
+    }
+    .wb-composer input {
+      flex: 1; border: none; background: transparent; padding: 6px 4px;
+      box-shadow: none;
+    }
+    .wb-composer input:focus { box-shadow: none; border: none; }
+    .wb-note { text-align: center; font-size: 0.72rem; color: var(--faint); }
+
+    /* Calendar · system month + auto-memory day axis */
+    .cal-shell {
+      background: linear-gradient(160deg, #2a1f3d 0%, #1a1528 42%, #121018 100%);
+      border: 1px solid #3a3152;
+      border-radius: 12px;
+      padding: 16px 16px 12px;
+      box-shadow: 0 0 0 1px #ffffff08 inset, 0 24px 48px -28px #000;
+    }
+    .cal-hero {
+      display: flex; align-items: flex-start; justify-content: space-between;
+      gap: 12px; margin-bottom: 14px;
+    }
+    .cal-hero-date {
+      font-size: 1.4rem; font-weight: 500; letter-spacing: -0.02em; color: #f5f3fa;
+    }
+    .cal-hero-lunar {
+      margin-top: 6px; font-size: 0.88rem; color: #d8d2ec; font-weight: 400;
+    }
+    .cal-hero-chev {
+      width: 28px; height: 28px; border-radius: 8px; border: 1px solid #2e2a42;
+      background: #1a1726; color: #9b94b8; display: grid; place-items: center;
+      font-size: 0.75rem; flex-shrink: 0;
+    }
+    .cal-monthbar {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 10px;
+    }
+    .cal-monthbar .cal-month-title {
+      font-size: 0.92rem; font-weight: 560; color: #f0eef8;
+      cursor: pointer; border: none; background: transparent;
+      padding: 4px 10px 4px 2px; border-radius: 6px; font-family: inherit;
+    }
+    .cal-monthbar .cal-month-title:hover { background: #2a2438; color: #fff; }
+    .cal-picker-grid {
+      display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px;
+      padding: 10px 0 6px; min-height: 240px;
+    }
+    .cal-picker-cell {
+      border: none; background: transparent; color: #ece8f6;
+      border-radius: 10px; padding: 18px 8px; font-size: 0.92rem;
+      cursor: pointer; font-family: inherit;
+    }
+    .cal-picker-cell:hover { background: #2a2438; }
+    .cal-picker-cell.on {
+      background: #d8d4e0; color: #1a1524; font-weight: 600;
+    }
+    .cal-picker-cell.muted { color: #6a6484; }
+    .cal-monthbar .cal-nav { display: flex; gap: 6px; }
+    .cal-monthbar button.sm {
+      background: #1a1726; border-color: #2e2a42; color: #c8c2dc;
+    }
+    .cal-monthbar button.sm:hover { background: #221e32; color: #fff; }
+    .cal-month-grid {
+      display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px 0;
+    }
+    .cal-dow {
+      text-align: center; font-size: 0.72rem; color: #7a7394;
+      padding: 8px 0 10px; font-weight: 500;
+    }
+    .cal-cell {
+      aspect-ratio: 1 / 1.05; max-height: 72px;
+      border: none; background: transparent; color: #ece8f6;
+      border-radius: 12px; padding: 6px 2px 4px;
+      display: flex; flex-direction: column; align-items: center; justify-content: flex-start;
+      gap: 2px; cursor: pointer; position: relative;
+    }
+    .cal-cell:hover { background: #1c1830; }
+    .cal-cell.out { color: #5a5470; }
+    .cal-cell.out .cal-lunar { color: #4a4560; }
+    .cal-cell .cal-num {
+      width: 32px; height: 32px; border-radius: 999px;
+      display: grid; place-items: center;
+      font-size: 1rem; font-weight: 500; letter-spacing: -0.02em;
+    }
+    .cal-cell.today .cal-num,
+    .cal-cell.selected .cal-num {
+      background: #d8d4e0; color: #1a1524;
+      font-weight: 600;
+    }
+    .cal-cell.today .cal-lunar,
+    .cal-cell.selected .cal-lunar {
+      color: #c8c2dc;
+    }
+    .cal-lunar {
+      font-size: 0.62rem; color: #8a83a8; line-height: 1.2;
+      max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+      padding: 0 2px;
+    }
+    .cal-lunar.jieqi { color: #c4b5fd; font-weight: 550; }
+    .cal-cell.has-ev::after {
+      content: ""; position: absolute; bottom: 4px;
+      width: 3px; height: 3px; border-radius: 999px; background: #a99bff88;
+    }
+    .cal-day-panel {
+      margin-top: 16px; padding-top: 14px; border-top: 1px solid #2a2540;
+    }
+    .cal-day-panel-head {
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 10px; flex-wrap: wrap; margin-bottom: 10px;
+    }
+    .cal-day-panel-head h3 {
+      margin: 0; font-size: 0.84rem; font-weight: 560; color: #d8d2ec;
+      letter-spacing: 0; text-transform: none;
+    }
+    .cal-track-filter {
+      display: flex; gap: 6px; flex-wrap: wrap;
+    }
+    .cal-track-filter button {
+      padding: 4px 10px; font-size: 0.72rem; border-radius: 999px;
+      background: transparent; color: #8a83a8; border-color: #2e2a42;
+    }
+    .cal-track-filter button.on {
+      background: #221e36; color: #e6e2f2; border-color: #4a3f78;
+    }
+    .cal-legend {
+      display: flex; flex-wrap: wrap; gap: 8px 12px; margin-bottom: 10px;
+      font-size: 0.68rem; color: #8a83a8;
+    }
+    .cal-legend i {
+      display: inline-block; width: 8px; height: 8px; border-radius: 2px; margin-right: 5px; vertical-align: middle;
+    }
+    .cal-day {
+      display: grid; grid-template-columns: 52px 1fr; gap: 0;
+      background: #0e0c16; border: 1px solid #2a2540;
+      border-radius: 12px; overflow: hidden; max-height: 420px; overflow-y: auto;
+    }
+    .cal-hour-label {
+      padding: 0 6px 0 8px; font-size: 0.65rem; color: #6a6484;
+      font-family: var(--mono); border-right: 1px solid #2a2540;
+      border-bottom: 1px solid #221e32; height: 52px;
+      display: flex; align-items: flex-start; padding-top: 4px;
+      background: #12101a;
+    }
+    .cal-hour-slot {
+      position: relative; border-bottom: 1px solid #221e32;
+      min-height: 52px; padding: 3px 8px; background: #0e0c16;
+    }
+    .cal-hour-slot:hover { background: #141220; }
+    .cal-evt {
+      position: relative; margin: 3px 0; padding: 7px 9px 7px 11px;
+      border-radius: 8px; border: 1px solid #2a2540;
+      background: #181528; cursor: default; border-left-width: 3px;
+    }
+    .cal-evt.u-critical { border-left-color: #f07178; background: #1c1218; }
+    .cal-evt.u-high { border-left-color: #e6a15c; background: #1c1612; }
+    .cal-evt.u-normal { border-left-color: #6c5ce7; background: #16122a; }
+    .cal-evt.u-low { border-left-color: #5c5c66; background: #14131a; }
+    .cal-evt.done { opacity: 0.45; }
+    .cal-evt.done .cal-evt-title { text-decoration: line-through; color: #8a83a8; }
+    .cal-evt-top {
+      display: flex; align-items: flex-start; justify-content: space-between; gap: 8px;
+    }
+    .cal-evt-title { font-size: 0.82rem; font-weight: 550; color: #ece8f6; }
+    .cal-evt-time {
+      font-size: 0.66rem; color: #7a7394; font-family: var(--mono); white-space: nowrap;
+    }
+    .cal-evt-meta {
+      margin-top: 4px; font-size: 0.7rem; color: #8a83a8; line-height: 1.4;
+      display: flex; flex-wrap: wrap; gap: 6px 10px;
+    }
+    .cal-tag {
+      display: inline-flex; align-items: center; height: 17px; padding: 0 6px;
+      border-radius: 999px; font-size: 0.62rem; font-weight: 560;
+      border: 1px solid #2e2a42; color: #8a83a8;
+    }
+    .cal-tag.local { color: #7dcea0; border-color: #1e3a2c; background: #0f1c15; }
+    .cal-tag.team { color: #c4b5fd; border-color: #3d3566; background: #1a1530; }
+    .cal-tag.urg-critical { color: #f07178; border-color: #3a1a1e; background: #2a1215; }
+    .cal-tag.urg-high { color: #e6a15c; border-color: #3a3220; background: #1f1a10; }
+    .cal-tag.urg-normal { color: #c4b5fd; border-color: #3d3566; background: #1a1530; }
+    .cal-tag.urg-low { color: #8a83a8; }
+    .cal-evt-actions { display: flex; gap: 4px; flex-shrink: 0; }
+    .cal-evt-actions button.sm {
+      background: #1a1726; border-color: #2e2a42; color: #c8c2dc; padding: 4px 8px;
+    }
+    .cal-empty-slot { font-size: 0.65rem; color: #3a3550; padding: 2px 0; }
+    .cal-note { margin-top: 10px; font-size: 0.7rem; color: #6a6484; line-height: 1.4; }
+
+  </style>
+</head>
+<body>
+  <div id="stage" class="stage">
+    <div id="shell" class="shell">
+      <div id="login-brand" class="brand">
+        <div class="mark">PA</div>
+        <h1>Portal Auth</h1>
+        <p>登录与角色闸 · demo v0</p>
+      </div>
+
+      <section id="login-card" class="card">
+        <div class="field">
+          <label for="user">用户名</label>
+          <input id="user" autocomplete="username" placeholder="用户名" />
+        </div>
+        <div class="field">
+          <label for="pass">密码</label>
+          <input id="pass" type="password" autocomplete="current-password" placeholder="密码" />
+        </div>
+        <div class="actions">
+          <button class="primary" id="btn-login" type="button">登录</button>
+          <button class="ghost" type="button" id="btn-fill-admin">admin</button>
+          <button class="ghost" type="button" id="btn-fill-member">member</button>
+        </div>
+        <div class="err" id="login-err"></div>
+        <div class="hint-line">试用 <code>admin</code> / <code>admin</code> 或 <code>member</code> / <code>member</code></div>
+      </section>
+
+      <section id="app-card" class="hidden">
+        <div class="topbar">
+          <div class="left">
+            <div class="logo">PA</div>
+            <div>
+              <div class="title">Anywork 门户</div>
+              <div class="sub">demo mock · 非现网</div>
+            </div>
+          </div>
+          <div class="who">
+            <span id="who-name" style="font-size:0.875rem"></span>
+            <span id="role-pill" class="pill"></span>
+            <button class="btn-enter-wb sm" id="btn-enter-workbench" type="button">进入工作台</button>
+            <button class="danger sm" id="btn-logout" type="button">登出</button>
+          </div>
+        </div>
+        <div id="portal-view">
+        <div class="layout">
+          <nav class="nav" id="nav">
+            <button type="button" data-tab="overview" class="active">总览</button>
+            <button type="button" data-tab="members" id="nav-members">成员</button>
+            <button type="button" data-tab="usage" id="nav-usage">用量</button>
+            <button type="button" data-tab="announce" id="nav-announce">公告</button>
+            <button type="button" data-tab="calendar" id="nav-calendar">日历</button>
+            <button type="button" data-tab="session">desk_session</button>
+            <button type="button" data-tab="gates">角色闸</button>
+            <div class="nav-hint" id="nav-hint"></div>
+          </nav>
+          <main class="main">
+            <div id="tab-overview">
+              <div id="overview-admin">
+                <h2>管理总览</h2>
+                <p class="lede">假数据面板 · 演示 admin 进门后的门户感（非真实 API）</p>
+                <div class="stats">
+                  <div class="stat"><div class="k">座位</div><div class="v">5</div><div class="s">4 在线 · 1 停用</div></div>
+                  <div class="stat"><div class="k">本月用量</div><div class="v">128.4</div><div class="s">万 token · 预算 62%</div></div>
+                  <div class="stat"><div class="k">座位健康</div><div class="v">4/5</div><div class="s">在线 · mock</div></div>
+                  <div class="stat"><div class="k">公告</div><div class="v">3</div><div class="s">1 置顶</div></div>
+                </div>
+
+                <div class="wb-enter-card">
+                  <div class="wb-copy">
+                    <div class="wb-k">进入工作台</div>
+                    <div class="wb-s">打开座位桌面占位页（本 demo 内 mock，不跳真实端口）</div>
+                  </div>
+                  <button class="btn-enter-wb" type="button" data-enter-wb>进入工作台</button>
+                </div>
+                <div class="grid2">
+                  <div class="panel">
+                    <h3>最近成员</h3>
+                    <table>
+                      <thead><tr><th>用户</th><th>角色</th><th>状态</th></tr></thead>
+                      <tbody>
+                        <tr><td>admin001</td><td>admin</td><td><span class="tag on">在线</span></td></tr>
+                        <tr><td>cth</td><td>member</td><td><span class="tag on">在线</span></td></tr>
+                        <tr><td>test001</td><td>member</td><td><span class="tag wait">空闲</span></td></tr>
+                        <tr><td>yk</td><td>member</td><td><span class="tag on">在线</span></td></tr>
+                      </tbody>
+                    </table>
+                  </div>
+                  <div class="panel">
+                    <h3>Admin-only</h3>
+                    <div class="gate-box" id="admin-only-box">
+                      <div style="font-size:0.9rem;font-weight:550;margin-bottom:6px">座位开通 / 预算闸</div>
+                      <div style="font-size:0.8rem;color:var(--muted);line-height:1.45;margin-bottom:12px">
+                        仅 admin 可见。此处为 mock：可调预算、停用座位（不下真单）。
+                      </div>
+                      <div style="display:flex;gap:8px;flex-wrap:wrap">
+                        <button class="sm" type="button" id="btn-mock-budget">调预算 +10%</button>
+                        <button class="sm" type="button" id="btn-mock-disable">停用 test001</button>
+                      </div>
+                      <div class="status" id="admin-only-status" style="margin-top:12px"></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div id="overview-member" class="hidden">
+                <h2>成员总览</h2>
+                <p class="lede">你是 member · 管理入口已闸住</p>
+                <div class="member-banner member">成员视图：可看个人用量；成员/公告管理需 admin。</div>
+                <div class="stats">
+                  <div class="stat"><div class="k">我的用量</div><div class="v">12.1</div><div class="s">万 token · 本月</div></div>
+                  <div class="stat"><div class="k">配额</div><div class="v">24%</div><div class="s">本月已用</div></div>
+                </div>
+
+                <div class="wb-enter-card">
+                  <div class="wb-copy">
+                    <div class="wb-k">进入工作台</div>
+                    <div class="wb-s">打开座位桌面占位页（本 demo 内 mock，不跳真实端口）</div>
+                  </div>
+                  <button class="btn-enter-wb" type="button" data-enter-wb>进入工作台</button>
+                </div>
+                <div class="panel">
+                  <h3>Member 区</h3>
+                  <div class="gate-box">
+                    <div style="font-size:0.9rem;font-weight:550">个人工具</div>
+                    <div style="font-size:0.8rem;color:var(--muted);margin:6px 0 12px">admin 与 member 均可进入</div>
+                    <button class="sm" type="button" id="btn-member-zone">进入 Member 区</button>
+                    <div class="status" id="member-status-home"></div>
+                  </div>
+                </div>
+                <div class="panel">
+                  <h3>Admin-only（闸）</h3>
+                  <div class="gate-box locked">
+                    <div style="font-size:0.9rem;font-weight:550;color:var(--deny)">无权限</div>
+                    <div style="font-size:0.8rem;color:var(--deny);margin:6px 0 12px;opacity:.85">座位开通 / 预算闸 · 仅 admin</div>
+                    <button class="sm" type="button" id="btn-admin-zone-member">尝试进入</button>
+                    <div class="status" id="admin-status-member"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div id="tab-members" class="hidden">
+              <h2>成员管理</h2>
+              <p class="lede">开座位 / 删实例 · mock（仅本页状态，不写库）</p>
+              <div class="panel">
+                <div class="members-toolbar">
+                  <input id="reg-user" placeholder="新用户名" autocomplete="off" />
+                  <button type="button" class="sm primary" id="btn-reg-member" style="flex:0">注册成员</button>
+                  <button type="button" class="sm" id="btn-refresh-seats">刷新座位状态</button>
+                  <button type="button" class="sm ghost" id="btn-reset-members">重置列表</button>
+                </div>
+                <table>
+                  <thead>
+                    <tr>
+                      <th>用户</th><th>角色</th><th>座位状态</th><th>端口</th><th>预算</th><th>操作</th>
+                    </tr>
+                  </thead>
+                  <tbody id="members-tbody"></tbody>
+                </table>
+                <div class="members-note" id="members-note">未开 → 启动中 → 已开（假端口）。删账号会一并清实例。</div>
+              </div>
+            </div>
+
+            <div id="tab-usage" class="hidden">
+              <h2>工作台用量</h2>
+              <p class="lede" id="usage-lede">mock 图表 + 明细 + 历史</p>
+              <div class="stats" id="usage-stats-admin">
+                <div class="stat"><div class="k">今日</div><div class="v">4.2万</div><div class="s">token</div></div>
+                <div class="stat"><div class="k">本月</div><div class="v">128.4万</div><div class="s">token</div></div>
+                <div class="stat"><div class="k">本月费用</div><div class="v">¥386</div><div class="s">估算</div></div>
+                <div class="stat"><div class="k">预算</div><div class="v">62%</div><div class="s">已用</div></div>
+              </div>
+              <div class="stats hidden" id="usage-stats-member">
+                <div class="stat"><div class="k">今日</div><div class="v">1.8万</div><div class="s">token</div></div>
+                <div class="stat"><div class="k">本月</div><div class="v">12.1万</div><div class="s">token</div></div>
+                <div class="stat"><div class="k">本月费用</div><div class="v">¥36</div><div class="s">估算</div></div>
+                <div class="stat"><div class="k">配额</div><div class="v">24%</div><div class="s">已用</div></div>
+              </div>
+
+              <div class="charts" id="usage-charts-admin">
+                <div class="chart-panel">
+                  <h3>近 7 日 token 趋势 · 团队</h3>
+                  <svg class="chart-svg" viewBox="0 0 420 180" role="img" aria-label="团队近7日token折线">
+                    <defs>
+                      <linearGradient id="gTeam" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stop-color="#5e6ad2" stop-opacity="0.35"/>
+                        <stop offset="100%" stop-color="#5e6ad2" stop-opacity="0"/>
+                      </linearGradient>
+                    </defs>
+                    <g stroke="#232326" stroke-width="1">
+                      <line x1="40" y1="20" x2="40" y2="150"/><line x1="40" y1="150" x2="400" y2="150"/>
+                      <line x1="40" y1="85" x2="400" y2="85" stroke-dasharray="3 4"/>
+                      <line x1="40" y1="50" x2="400" y2="50" stroke-dasharray="3 4"/>
+                      <line x1="40" y1="120" x2="400" y2="120" stroke-dasharray="3 4"/>
+                    </g>
+                    <g fill="#5c5c66" font-size="10" font-family="ui-monospace,monospace">
+                      <text x="36" y="24" text-anchor="end">60万</text>
+                      <text x="36" y="89" text-anchor="end">30万</text>
+                      <text x="36" y="154" text-anchor="end">0</text>
+                      <text x="70" y="168" text-anchor="middle">10-30</text>
+                      <text x="125" y="168" text-anchor="middle">10-31</text>
+                      <text x="180" y="168" text-anchor="middle">11-01</text>
+                      <text x="235" y="168" text-anchor="middle">11-02</text>
+                      <text x="290" y="168" text-anchor="middle">11-03</text>
+                      <text x="345" y="168" text-anchor="middle">11-04</text>
+                      <text x="395" y="168" text-anchor="middle">11-05</text>
+                    </g>
+                    <!-- points: 18,22,28,35,31,42,48 万 → y = 150 - v/60*130 -->
+                    <path fill="url(#gTeam)" d="M70,111 L125,102 L180,89 L235,74 L290,83 L345,59 L395,46 L395,150 L70,150 Z"/>
+                    <path fill="none" stroke="#8b93ff" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"
+                      d="M70,111 L125,102 L180,89 L235,74 L290,83 L345,59 L395,46"/>
+                    <g fill="#8b93ff">
+                      <circle cx="70" cy="111" r="3"/><circle cx="125" cy="102" r="3"/><circle cx="180" cy="89" r="3"/>
+                      <circle cx="235" cy="74" r="3"/><circle cx="290" cy="83" r="3"/><circle cx="345" cy="59" r="3"/>
+                      <circle cx="395" cy="46" r="3"/>
+                    </g>
+                  </svg>
+                  <div class="chart-legend"><span><i class="swatch" style="background:#8b93ff"></i>日 token（万）</span></div>
+                </div>
+                <div class="chart-panel">
+                  <h3>成员占比 · 本月</h3>
+                  <svg class="chart-svg" viewBox="0 0 280 180" role="img" aria-label="成员用量柱状">
+                    <g stroke="#232326" stroke-width="1">
+                      <line x1="40" y1="20" x2="40" y2="150"/><line x1="40" y1="150" x2="260" y2="150"/>
+                    </g>
+                    <g fill="#5c5c66" font-size="10" font-family="ui-monospace,monospace">
+                      <text x="36" y="24" text-anchor="end">50万</text>
+                      <text x="36" y="89" text-anchor="end">25万</text>
+                      <text x="36" y="154" text-anchor="end">0</text>
+                      <text x="70" y="168" text-anchor="middle">cth</text>
+                      <text x="115" y="168" text-anchor="middle">admin</text>
+                      <text x="160" y="168" text-anchor="middle">yk</text>
+                      <text x="205" y="168" text-anchor="middle">test</text>
+                      <text x="245" y="168" text-anchor="middle">xc</text>
+                    </g>
+                    <!-- heights: 45,32,28,14,9.4 万 → h = v/50*130 -->
+                    <rect x="56" y="33" width="28" height="117" rx="3" fill="#5e6ad2"/>
+                    <rect x="101" y="67" width="28" height="83" rx="3" fill="#7a83e8"/>
+                    <rect x="146" y="77" width="28" height="73" rx="3" fill="#8b93ff"/>
+                    <rect x="191" y="114" width="28" height="36" rx="3" fill="#a8aef5"/>
+                    <rect x="231" y="126" width="28" height="24" rx="3" fill="#c4c8fa"/>
+                  </svg>
+                  <div class="chart-legend"><span><i class="swatch" style="background:#5e6ad2"></i>本月 token（万）</span></div>
+                </div>
+              </div>
+
+              <div class="charts hidden" id="usage-charts-member">
+                <div class="chart-panel">
+                  <h3>近 7 日 token 趋势 · 我的</h3>
+                  <svg class="chart-svg" viewBox="0 0 420 180" role="img" aria-label="个人近7日token折线">
+                    <defs>
+                      <linearGradient id="gMe" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stop-color="#3dd68c" stop-opacity="0.3"/>
+                        <stop offset="100%" stop-color="#3dd68c" stop-opacity="0"/>
+                      </linearGradient>
+                    </defs>
+                    <g stroke="#232326" stroke-width="1">
+                      <line x1="40" y1="20" x2="40" y2="150"/><line x1="40" y1="150" x2="400" y2="150"/>
+                      <line x1="40" y1="85" x2="400" y2="85" stroke-dasharray="3 4"/>
+                      <line x1="40" y1="50" x2="400" y2="50" stroke-dasharray="3 4"/>
+                      <line x1="40" y1="120" x2="400" y2="120" stroke-dasharray="3 4"/>
+                    </g>
+                    <g fill="#5c5c66" font-size="10" font-family="ui-monospace,monospace">
+                      <text x="36" y="24" text-anchor="end">4万</text>
+                      <text x="36" y="89" text-anchor="end">2万</text>
+                      <text x="36" y="154" text-anchor="end">0</text>
+                      <text x="70" y="168" text-anchor="middle">10-30</text>
+                      <text x="125" y="168" text-anchor="middle">10-31</text>
+                      <text x="180" y="168" text-anchor="middle">11-01</text>
+                      <text x="235" y="168" text-anchor="middle">11-02</text>
+                      <text x="290" y="168" text-anchor="middle">11-03</text>
+                      <text x="345" y="168" text-anchor="middle">11-04</text>
+                      <text x="395" y="168" text-anchor="middle">11-05</text>
+                    </g>
+                    <!-- 0.8,1.1,1.4,1.5,1.3,3.1,1.8 万 → y=150-v/4*130 -->
+                    <path fill="url(#gMe)" d="M70,124 L125,114 L180,105 L235,101 L290,108 L345,49 L395,92 L395,150 L70,150 Z"/>
+                    <path fill="none" stroke="#3dd68c" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"
+                      d="M70,124 L125,114 L180,105 L235,101 L290,108 L345,49 L395,92"/>
+                    <g fill="#3dd68c">
+                      <circle cx="70" cy="124" r="3"/><circle cx="125" cy="114" r="3"/><circle cx="180" cy="105" r="3"/>
+                      <circle cx="235" cy="101" r="3"/><circle cx="290" cy="108" r="3"/><circle cx="345" cy="49" r="3"/>
+                      <circle cx="395" cy="92" r="3"/>
+                    </g>
+                  </svg>
+                  <div class="chart-legend"><span><i class="swatch" style="background:#3dd68c"></i>日 token（万）</span></div>
+                </div>
+                <div class="chart-panel">
+                  <h3>用途拆分 · 本月</h3>
+                  <svg class="chart-svg" viewBox="0 0 280 180" role="img" aria-label="用途柱状">
+                    <g stroke="#232326" stroke-width="1">
+                      <line x1="40" y1="20" x2="40" y2="150"/><line x1="40" y1="150" x2="260" y2="150"/>
+                    </g>
+                    <g fill="#5c5c66" font-size="10" font-family="ui-monospace,monospace">
+                      <text x="36" y="24" text-anchor="end">8万</text>
+                      <text x="36" y="89" text-anchor="end">4万</text>
+                      <text x="36" y="154" text-anchor="end">0</text>
+                      <text x="78" y="168" text-anchor="middle">对话</text>
+                      <text x="138" y="168" text-anchor="middle">分析</text>
+                      <text x="198" y="168" text-anchor="middle">工具</text>
+                      <text x="245" y="168" text-anchor="middle">其他</text>
+                    </g>
+                    <!-- 5.4, 3.1, 2.4, 1.2 -->
+                    <rect x="58" y="62" width="40" height="88" rx="3" fill="#3dd68c"/>
+                    <rect x="118" y="100" width="40" height="50" rx="3" fill="#2bb673"/>
+                    <rect x="178" y="111" width="40" height="39" rx="3" fill="#1f9a5e"/>
+                    <rect x="225" y="131" width="40" height="19" rx="3" fill="#167a49"/>
+                  </svg>
+                  <div class="chart-legend"><span><i class="swatch" style="background:#3dd68c"></i>本月 token（万）</span></div>
+                </div>
+              </div>
+
+              <div class="panel" id="usage-table-admin">
+                <h3>团队明细</h3>
+                <table>
+                  <thead>
+                    <tr>
+                      <th>成员</th><th>日期</th><th>模型 / 用途</th><th>Token</th><th>费用</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr><td>cth</td><td>2026-11-05</td><td>deepseek-v3 · 对话</td><td>42,180</td><td>¥12.60</td></tr>
+                    <tr><td>admin001</td><td>2026-11-05</td><td>deepseek-r1 · 代码</td><td>28,940</td><td>¥18.40</td></tr>
+                    <tr><td>yk</td><td>2026-11-05</td><td>deepseek-v3 · 对话</td><td>19,220</td><td>¥5.80</td></tr>
+                    <tr><td>test001</td><td>2026-11-04</td><td>deepseek-v3 · 工具</td><td>11,050</td><td>¥3.30</td></tr>
+                    <tr><td>cth</td><td>2026-11-04</td><td>deepseek-r1 · 分析</td><td>55,610</td><td>¥34.20</td></tr>
+                    <tr><td>admin001</td><td>2026-11-04</td><td>deepseek-v3 · 对话</td><td>16,400</td><td>¥4.90</td></tr>
+                    <tr><td>yk</td><td>2026-11-03</td><td>deepseek-v3 · 对话</td><td>22,870</td><td>¥6.90</td></tr>
+                    <tr><td>xc</td><td>2026-11-03</td><td>deepseek-v3 · 导入</td><td>8,120</td><td>¥2.40</td></tr>
+                    <tr><td>cth</td><td>2026-11-02</td><td>deepseek-r1 · 代码</td><td>47,300</td><td>¥29.10</td></tr>
+                    <tr><td>test001</td><td>2026-11-02</td><td>deepseek-v3 · 对话</td><td>14,660</td><td>¥4.40</td></tr>
+                  </tbody>
+                </table>
+              </div>
+              <div class="panel hidden" id="usage-table-member">
+                <h3>我的明细</h3>
+                <table>
+                  <thead>
+                    <tr>
+                      <th>日期</th><th>模型 / 用途</th><th>Token</th><th>费用</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr><td>2026-11-05</td><td>deepseek-v3 · 对话</td><td>18,420</td><td>¥5.50</td></tr>
+                    <tr><td>2026-11-04</td><td>deepseek-r1 · 分析</td><td>31,200</td><td>¥19.20</td></tr>
+                    <tr><td>2026-11-04</td><td>deepseek-v3 · 对话</td><td>9,880</td><td>¥3.00</td></tr>
+                    <tr><td>2026-11-03</td><td>deepseek-v3 · 工具</td><td>12,640</td><td>¥3.80</td></tr>
+                    <tr><td>2026-11-02</td><td>deepseek-v3 · 对话</td><td>15,110</td><td>¥4.50</td></tr>
+                  </tbody>
+                </table>
+              </div>
+
+              <div class="panel" id="usage-hist-admin">
+                <h3>历史记录 · 按日汇总（团队）</h3>
+                <table>
+                  <thead>
+                    <tr><th>日期</th><th>活跃成员</th><th>调用次数</th><th>Token</th><th>费用</th></tr>
+                  </thead>
+                  <tbody>
+                    <tr><td>2026-11-05</td><td>4</td><td>86</td><td>90,340</td><td>¥36.80</td></tr>
+                    <tr><td>2026-11-04</td><td>3</td><td>72</td><td>83,060</td><td>¥42.40</td></tr>
+                    <tr><td>2026-11-03</td><td>3</td><td>61</td><td>58,120</td><td>¥18.20</td></tr>
+                    <tr><td>2026-11-02</td><td>4</td><td>79</td><td>71,450</td><td>¥38.90</td></tr>
+                    <tr><td>2026-11-01</td><td>5</td><td>94</td><td>102,200</td><td>¥48.10</td></tr>
+                    <tr><td>2026-10-31</td><td>4</td><td>68</td><td>64,880</td><td>¥24.60</td></tr>
+                    <tr><td>2026-10-30</td><td>3</td><td>55</td><td>49,710</td><td>¥19.40</td></tr>
+                  </tbody>
+                </table>
+              </div>
+              <div class="panel" id="usage-hist-admin-calls">
+                <h3>历史记录 · 按次（团队最近）</h3>
+                <table>
+                  <thead>
+                    <tr><th>时间</th><th>成员</th><th>会话</th><th>模型</th><th>Token</th><th>费用</th></tr>
+                  </thead>
+                  <tbody>
+                    <tr><td>11-05 14:52</td><td>cth</td><td>sess_a91c…</td><td>deepseek-v3</td><td>2,480</td><td>¥0.74</td></tr>
+                    <tr><td>11-05 14:41</td><td>admin001</td><td>sess_7e02…</td><td>deepseek-r1</td><td>6,120</td><td>¥3.90</td></tr>
+                    <tr><td>11-05 13:18</td><td>yk</td><td>sess_44b1…</td><td>deepseek-v3</td><td>1,960</td><td>¥0.59</td></tr>
+                    <tr><td>11-05 11:05</td><td>test001</td><td>sess_c30e…</td><td>deepseek-v3</td><td>3,340</td><td>¥1.00</td></tr>
+                    <tr><td>11-04 22:17</td><td>cth</td><td>sess_a91c…</td><td>deepseek-r1</td><td>8,750</td><td>¥5.40</td></tr>
+                    <tr><td>11-04 19:44</td><td>admin001</td><td>sess_0fd9…</td><td>deepseek-v3</td><td>2,110</td><td>¥0.63</td></tr>
+                    <tr><td>11-04 16:02</td><td>xc</td><td>sess_55aa…</td><td>deepseek-v3</td><td>1,420</td><td>¥0.43</td></tr>
+                    <tr><td>11-03 10:28</td><td>yk</td><td>sess_44b1…</td><td>deepseek-v3</td><td>4,080</td><td>¥1.22</td></tr>
+                  </tbody>
+                </table>
+              </div>
+
+              <div class="panel hidden" id="usage-hist-member">
+                <h3>历史记录 · 按日汇总（我的）</h3>
+                <table>
+                  <thead>
+                    <tr><th>日期</th><th>调用次数</th><th>Token</th><th>费用</th></tr>
+                  </thead>
+                  <tbody>
+                    <tr><td>2026-11-05</td><td>12</td><td>18,420</td><td>¥5.50</td></tr>
+                    <tr><td>2026-11-04</td><td>18</td><td>41,080</td><td>¥22.20</td></tr>
+                    <tr><td>2026-11-03</td><td>9</td><td>12,640</td><td>¥3.80</td></tr>
+                    <tr><td>2026-11-02</td><td>11</td><td>15,110</td><td>¥4.50</td></tr>
+                    <tr><td>2026-11-01</td><td>14</td><td>19,860</td><td>¥6.00</td></tr>
+                    <tr><td>2026-10-31</td><td>8</td><td>9,420</td><td>¥2.80</td></tr>
+                    <tr><td>2026-10-30</td><td>7</td><td>8,150</td><td>¥2.40</td></tr>
+                  </tbody>
+                </table>
+              </div>
+              <div class="panel hidden" id="usage-hist-member-calls">
+                <h3>历史记录 · 按次（我的最近）</h3>
+                <table>
+                  <thead>
+                    <tr><th>时间</th><th>会话</th><th>模型 / 用途</th><th>Token</th><th>费用</th></tr>
+                  </thead>
+                  <tbody>
+                    <tr><td>11-05 14:08</td><td>sess_m2c1…</td><td>deepseek-v3 · 对话</td><td>2,140</td><td>¥0.64</td></tr>
+                    <tr><td>11-05 11:33</td><td>sess_m2c1…</td><td>deepseek-v3 · 对话</td><td>3,680</td><td>¥1.10</td></tr>
+                    <tr><td>11-04 21:55</td><td>sess_m9aa…</td><td>deepseek-r1 · 分析</td><td>7,920</td><td>¥4.90</td></tr>
+                    <tr><td>11-04 18:12</td><td>sess_m9aa…</td><td>deepseek-r1 · 分析</td><td>5,410</td><td>¥3.30</td></tr>
+                    <tr><td>11-04 09:40</td><td>sess_m2c1…</td><td>deepseek-v3 · 对话</td><td>1,980</td><td>¥0.59</td></tr>
+                    <tr><td>11-03 15:27</td><td>sess_m441…</td><td>deepseek-v3 · 工具</td><td>4,220</td><td>¥1.27</td></tr>
+                    <tr><td>11-02 16:01</td><td>sess_m2c1…</td><td>deepseek-v3 · 对话</td><td>2,760</td><td>¥0.83</td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <div id="tab-announce" class="hidden">
+              <h2>公告</h2>
+              <p class="lede">mock 公告板</p>
+              <div class="panel">
+                <div class="announce-item">
+                  <div class="t">置顶 · 周五演示窗口</div>
+                  <div class="m">港机勿擅自改；本机 Docker-only。</div>
+                  <div class="d">2026-11-05 · admin001</div>
+                </div>
+                <div class="announce-item">
+                  <div class="t">资料库共享说明</div>
+                  <div class="m">drive/kb 为门户全员共享卷，非按座位隔离。</div>
+                  <div class="d">2026-11-02 · admin001</div>
+                </div>
+                <div class="announce-item">
+                  <div class="t">xlsx 预览已知问题</div>
+                  <div class="m">documentpreview 自 10-29 起禁用 Iterator 相关崩溃。</div>
+                  <div class="d">2026-11-02 · admin001</div>
+                </div>
+              </div>
+            </div>
+
+
+            <div id="tab-calendar" class="hidden">
+              <h2>日历</h2>
+              <p class="lede">系统月历视觉 + dsh-auto-memory 日轴（点日期展开）</p>
+              <div class="cal-shell">
+                <div class="cal-hero">
+                  <div>
+                    <div class="cal-hero-date" id="cal-hero-date">11月5日，星期四</div>
+                    <div class="cal-hero-lunar" id="cal-hero-lunar">九月廿七</div>
+                  </div>
+                  <button type="button" class="cal-hero-chev" id="btn-cal-expand" title="展开/收起日轴">▾</button>
+                </div>
+                <div class="cal-monthbar">
+                  <button type="button" class="cal-month-title" id="cal-month-title" title="点选月份 / 年份">2026年11月</button>
+                  <div class="cal-nav">
+                    <button type="button" class="sm" id="btn-cal-prev" title="上月">︿</button>
+                    <button type="button" class="sm" id="btn-cal-today">今天</button>
+                    <button type="button" class="sm" id="btn-cal-next" title="下月">﹀</button>
+                  </div>
+                </div>
+                <div class="cal-month-grid" id="cal-month-grid"></div>
+                <div class="cal-picker-grid hidden" id="cal-picker-grid"></div>
+
+                <div class="cal-day-panel" id="cal-day-panel">
+                  <div class="cal-day-panel-head">
+                    <h3 id="cal-axis-heading">日视图 · 07:00–22:00</h3>
+                    <div class="cal-track-filter" id="cal-track-filter">
+                      <button type="button" class="on" data-track="all">全部</button>
+                      <button type="button" data-track="local">本地</button>
+                      <button type="button" data-track="team">团队</button>
+                    </div>
+                  </div>
+                  <div class="cal-legend">
+                    <span><i style="background:#f07178"></i>紧急·重要</span>
+                    <span><i style="background:#e6a15c"></i>紧急·次要</span>
+                    <span><i style="background:#6c5ce7"></i>普通</span>
+                    <span><i style="background:#5c5c66"></i>低优</span>
+                    <span class="cal-tag local">本地</span>
+                    <span class="cal-tag team">团队</span>
+                  </div>
+                  <div class="cal-day" id="cal-day"></div>
+                </div>
+              </div>
+              <div class="cal-note">月格选日 → 下方日轴跟选中日。假数据；港 / lnk / 现网未动。</div>
+            </div>
+
+            <div id="tab-session" class="hidden">
+              <h2>desk_session</h2>
+              <p class="lede">当前 mock 会话（localStorage）</p>
+              <div class="panel"><pre class="session" id="session-view"></pre></div>
+            </div>
+
+            <div id="tab-gates" class="hidden">
+              <h2>角色闸</h2>
+              <p class="lede">admin 进 / member 进 / 无角色拒</p>
+              <div class="grid2">
+                <div class="panel">
+                  <h3>Admin-only</h3>
+                  <div class="gate-box" id="gate-admin-box">
+                    <button class="sm" type="button" id="btn-admin-zone">尝试进入</button>
+                    <div class="status" id="admin-status"></div>
+                  </div>
+                </div>
+                <div class="panel">
+                  <h3>Member 区</h3>
+                  <div class="gate-box">
+                    <button class="sm" type="button" id="btn-member-zone-2">尝试进入</button>
+                    <div class="status" id="member-status"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </main>
+        </div>
+        </div><!-- /portal-view -->
+
+        <div id="workbench-view" class="hidden">
+          <div class="wb-bar">
+            <div>
+              <div class="wb-title">工作台</div>
+              <div class="wb-sub">座位桌面占位 · mock（不跳真实端口）</div>
+            </div>
+            <div style="display:flex;gap:8px;align-items:center">
+              <span id="wb-who" style="font-size:0.8rem;color:var(--muted)"></span>
+              <button class="sm" type="button" id="btn-back-portal">返回门户</button>
+            </div>
+          </div>
+          <div class="wb-body">
+            <aside class="wb-rail">
+              <h3>会话</h3>
+              <div class="wb-chat-item active">
+                <div class="n">欢迎</div>
+                <div class="p">今天想从哪开始？</div>
+              </div>
+              <div class="wb-chat-item">
+                <div class="n">周报草稿</div>
+                <div class="p">mock · 假会话</div>
+              </div>
+              <div class="wb-chat-item">
+                <div class="n">资料库速查</div>
+                <div class="p">mock · 假会话</div>
+              </div>
+            </aside>
+            <div class="wb-main">
+              <div class="wb-welcome">
+                <div class="mark">WB</div>
+                <h2>已进入工作台</h2>
+                <p>这是 demo 内的座位桌面占位页，不连接真实座位端口。点右上角「返回门户」回到总览 / 成员 / 用量。</p>
+              </div>
+              <div class="wb-fake-thread">
+                <div class="wb-msg">
+                  <div class="wb-av">PA</div>
+                  <div class="wb-bubble">
+                    <div class="who">Portal Auth · mock</div>
+                    <div class="txt">你好，这里是假会话区。登录角色与 desk_session 逻辑未改。</div>
+                  </div>
+                </div>
+                <div class="wb-msg">
+                  <div class="wb-av">你</div>
+                  <div class="wb-bubble">
+                    <div class="who">你</div>
+                    <div class="txt">（示例）帮我打开本周待办。</div>
+                  </div>
+                </div>
+              </div>
+              <div class="wb-composer">
+                <input disabled placeholder="假输入框 · 本 demo 不下真消息" />
+                <button class="sm primary" type="button" disabled style="flex:0;opacity:.45">发送</button>
+              </div>
+              <div class="wb-note">视觉延续深色 Linear / DSH 风 · 港 / lnk / 现网未动</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <div id="login-foot" class="foot">anywork-portal-auth · 本地 mock · 未装进现网 DSH</div>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      var KEY = "anywork_portal_auth_demo_desk_session";
+      var USERS = {
+        admin: { password: "admin", role: "admin", displayName: "Admin Demo" },
+        member: { password: "member", role: "member", displayName: "Member Demo" },
+      };
+
+      function uid() {
+        return "ds_" + Math.random().toString(36).slice(2, 10) + Date.now().toString(36).slice(-4);
+      }
+      function readSession() {
+        try {
+          var raw = localStorage.getItem(KEY);
+          return raw ? JSON.parse(raw) : null;
+        } catch (e) { return null; }
+      }
+      function writeSession(session) {
+        if (!session) localStorage.removeItem(KEY);
+        else localStorage.setItem(KEY, JSON.stringify(session));
+      }
+      function $(id) { return document.getElementById(id); }
+
+      var MEMBERS_KEY = "anywork_portal_auth_demo_members";
+      var DEFAULT_MEMBERS = [
+        { id: "admin001", role: "admin", budget: "—", seat: "up", port: 3301 },
+        { id: "cth", role: "member", budget: "80%", seat: "up", port: 3303 },
+        { id: "test001", role: "member", budget: "45%", seat: "idle", port: 3302 },
+        { id: "yk", role: "member", budget: "22%", seat: "up", port: 3304 },
+        { id: "xc", role: "member", budget: "10%", seat: "off", port: null },
+      ];
+      var nextPort = 3306;
+      var bootTimers = {};
+
+      function loadMembers() {
+        try {
+          var raw = localStorage.getItem(MEMBERS_KEY);
+          if (raw) {
+            var list = JSON.parse(raw);
+            list.forEach(function (m) {
+              if (m.port && m.port >= nextPort) nextPort = m.port + 1;
+            });
+            return list;
+          }
+        } catch (e) {}
+        return DEFAULT_MEMBERS.map(function (m) { return Object.assign({}, m); });
+      }
+      function saveMembers(list) {
+        localStorage.setItem(MEMBERS_KEY, JSON.stringify(list));
+      }
+      function seatTag(seat) {
+        if (seat === "up") return '<span class="tag on">已开</span>';
+        if (seat === "booting") return '<span class="tag boot">启动中…</span>';
+        if (seat === "idle") return '<span class="tag wait">空闲</span>';
+        return '<span class="tag off">未开</span>';
+      }
+      function renderMembers() {
+        var tbody = $("members-tbody");
+        if (!tbody) return;
+        var list = loadMembers();
+        if (!list.length) {
+          tbody.innerHTML = '<tr><td colspan="6" style="color:var(--faint)">暂无成员 · 可上方注册</td></tr>';
+          return;
+        }
+        tbody.innerHTML = list.map(function (m) {
+          var port = m.port ? '<span class="mono">:' + m.port + '</span>' : '<span class="mono">—</span>';
+          var actions = '<div class="row-actions">';
+          if (m.seat === "off" || m.seat === "idle") {
+            actions += '<button type="button" class="sm" data-act="boot" data-id="' + m.id + '">开座位</button>';
+          } else if (m.seat === "booting") {
+            actions += '<button type="button" class="sm" disabled>启动中</button>';
+          } else if (m.seat === "up") {
+            actions += '<button type="button" class="sm" data-act="stop" data-id="' + m.id + '">停实例</button>';
+          }
+          if (m.role !== "admin" || m.id !== "admin001") {
+            actions += '<button type="button" class="sm danger" data-act="delete" data-id="' + m.id + '">删账号+实例</button>';
+          }
+          actions += '</div>';
+          return '<tr>' +
+            '<td>' + m.id + '</td>' +
+            '<td>' + m.role + '</td>' +
+            '<td>' + seatTag(m.seat) + '</td>' +
+            '<td>' + port + '</td>' +
+            '<td>' + (m.budget || "—") + '</td>' +
+            '<td>' + actions + '</td>' +
+            '</tr>';
+        }).join("");
+      }
+      function setMemberNote(msg) {
+        var n = $("members-note");
+        if (n) n.textContent = msg;
+      }
+      function bootSeat(id) {
+        var list = loadMembers();
+        var m = list.find(function (x) { return x.id === id; });
+        if (!m || m.seat === "up" || m.seat === "booting") return;
+        m.seat = "booting";
+        m.port = null;
+        saveMembers(list);
+        renderMembers();
+        setMemberNote("正在拉起 " + id + " 座位…（mock ~1.2s）");
+        if (bootTimers[id]) clearTimeout(bootTimers[id]);
+        bootTimers[id] = setTimeout(function () {
+          var list2 = loadMembers();
+          var m2 = list2.find(function (x) { return x.id === id; });
+          if (!m2) return;
+          m2.seat = "up";
+          m2.port = nextPort++;
+          saveMembers(list2);
+          renderMembers();
+          setMemberNote(id + " 已开 · 端口 :" + m2.port + "（假数据）");
+        }, 1200);
+      }
+      function stopSeat(id) {
+        var list = loadMembers();
+        var m = list.find(function (x) { return x.id === id; });
+        if (!m) return;
+        m.seat = "off";
+        m.port = null;
+        saveMembers(list);
+        renderMembers();
+        setMemberNote("已停 " + id + " 实例（mock）");
+      }
+      function deleteMember(id) {
+        if (!confirm("确认删除账号 " + id + " 并清除实例？此操作仅 mock，刷新可重置。")) return;
+        if (bootTimers[id]) { clearTimeout(bootTimers[id]); delete bootTimers[id]; }
+        var list = loadMembers().filter(function (x) { return x.id !== id; });
+        saveMembers(list);
+        renderMembers();
+        setMemberNote("已删账号+实例：" + id);
+      }
+
+      var refreshingSeats = false;
+      function refreshSeats() {
+        if (refreshingSeats) return;
+        refreshingSeats = true;
+        var btn = $("btn-refresh-seats");
+        if (btn) { btn.disabled = true; btn.textContent = "探测中…"; }
+        setMemberNote("正在重新探测座位状态…（mock）");
+        var delay = 600 + Math.floor(Math.random() * 700);
+        setTimeout(function () {
+          var list = loadMembers();
+          var changed = 0;
+          list.forEach(function (m) {
+            // Don't interrupt an in-progress boot
+            if (m.seat === "booting") return;
+            var roll = Math.random();
+            if (m.seat === "up") {
+              // mostly stay up; rare flap to idle
+              if (roll < 0.12) {
+                m.seat = "idle";
+                changed++;
+              } else if (!m.port) {
+                m.port = nextPort++;
+                changed++;
+              }
+            } else if (m.seat === "idle") {
+              if (roll < 0.35) {
+                m.seat = "up";
+                if (!m.port) m.port = nextPort++;
+                changed++;
+              } else if (roll > 0.85) {
+                m.seat = "off";
+                m.port = null;
+                changed++;
+              }
+            } else if (m.seat === "off") {
+              // stay off mostly; tiny chance show as idle after probe
+              if (roll < 0.08) {
+                m.seat = "idle";
+                m.port = nextPort++;
+                changed++;
+              }
+            }
+          });
+          saveMembers(list);
+          renderMembers();
+          refreshingSeats = false;
+          if (btn) { btn.disabled = false; btn.textContent = "刷新座位状态"; }
+          setMemberNote("探测完成 · " + delay + "ms · " + (changed ? ("状态抖动 " + changed + " 项") : "无变化"));
+        }, delay);
+      }
+
+      function registerMember() {
+        var input = $("reg-user");
+        var name = (input.value || "").trim().toLowerCase().replace(/\s+/g, "");
+        if (!name) { setMemberNote("请输入新用户名"); return; }
+        if (!/^[a-z0-9_\-]{2,24}$/.test(name)) {
+          setMemberNote("用户名仅字母数字_-/2–24 位");
+          return;
+        }
+        var list = loadMembers();
+        if (list.some(function (x) { return x.id === name; })) {
+          setMemberNote(name + " 已存在");
+          return;
+        }
+        list.push({ id: name, role: "member", budget: "0%", seat: "off", port: null });
+        saveMembers(list);
+        input.value = "";
+        renderMembers();
+        setMemberNote("已注册 " + name + "（未开座位）· 可点「开座位」provision");
+      }
+
+
+      function showPortal() {
+        var pv = $("portal-view");
+        var wv = $("workbench-view");
+        if (pv) pv.classList.remove("hidden");
+        if (wv) wv.classList.add("hidden");
+        var topEnter = $("btn-enter-workbench");
+        if (topEnter) topEnter.classList.remove("hidden");
+      }
+
+      function showWorkbench() {
+        var s = readSession();
+        if (!s) return;
+        var pv = $("portal-view");
+        var wv = $("workbench-view");
+        if (pv) pv.classList.add("hidden");
+        if (wv) wv.classList.remove("hidden");
+        var topEnter = $("btn-enter-workbench");
+        if (topEnter) topEnter.classList.add("hidden");
+        var wbWho = $("wb-who");
+        if (wbWho) wbWho.textContent = (s.displayName || s.user) + " · " + (s.role || "");
+      }
+
+
+      var calMonth = new Date(2026, 10, 1); // month cursor
+      var calSelected = "2026-11-05";
+      var calTrack = "all";
+      var calAxisOpen = true;
+      var calViewMode = "days"; // days | months | years
+      var MONTH_NAMES = ["1月","2月","3月","4月","5月","6月","7月","8月","9月","10月","11月","12月"];
+      var WEEKDAYS_MON = ["一","二","三","四","五","六","日"];
+      var WEEKDAYS_FULL = ["日","一","二","三","四","五","六"];
+      var URGENCY_LABEL = {
+        critical: "紧急·重要", high: "紧急·次要", normal: "普通", low: "低优"
+      };
+      // mock lunar / jieqi labels keyed by YYYY-MM-DD (demo, not astronomical)
+      var LUNAR_MAP = {
+        "2026-10-26":"十七","2026-10-27":"十八","2026-10-28":"十九","2026-10-29":"二十",
+        "2026-10-30":"廿一","2026-10-31":"廿二",
+        "2026-11-01":"廿三","2026-11-02":"廿四","2026-11-03":"廿五","2026-11-04":"廿六",
+        "2026-11-05":"廿七","2026-11-06":"廿八","2026-11-07":"立冬","2026-11-08":"三十",
+        "2026-11-09":"十月","2026-11-10":"初二","2026-11-11":"初三","2026-11-12":"初四",
+        "2026-11-13":"初五","2026-11-14":"初六","2026-11-15":"初七","2026-11-16":"初八",
+        "2026-11-17":"初九","2026-11-18":"初十","2026-11-19":"十一","2026-11-20":"十二",
+        "2026-11-21":"十三","2026-11-22":"小雪","2026-11-23":"十五","2026-11-24":"十六",
+        "2026-11-25":"十七","2026-11-26":"十八","2026-11-27":"十九","2026-11-28":"二十",
+        "2026-11-29":"廿一","2026-11-30":"廿二",
+        "2026-12-01":"廿三","2026-12-02":"廿四","2026-12-03":"廿五","2026-12-04":"廿六",
+        "2026-12-05":"廿七","2026-12-06":"廿八"
+      };
+      var JIEQI = { "2026-11-07":1, "2026-11-22":1 };
+
+      var calEvents = [
+        { id: "e1", date: "2026-11-05", start: "09:00", end: "09:30", title: "港机 guest-shutdown RO 回顾",
+          location: "远程 · 港机", remind: "开始前 15 分", urgency: "high", track: "team", done: false,
+          note: "阿里云 powerdown · 非 OOM" },
+        { id: "e2", date: "2026-11-05", start: "11:00", end: "12:00", title: "portal-auth 日历对齐系统月历",
+          location: "本机桌面", remind: "开始前 30 分", urgency: "critical", track: "local", done: false,
+          note: "紫黑月格 + 日轴" },
+        { id: "e3", date: "2026-11-05", start: "14:00", end: "15:00", title: "周五演示窗口",
+          location: "会议室 mock", remind: "开始前 1 小时", urgency: "critical", track: "team", done: false,
+          note: "置顶公告 · admin001" },
+        { id: "e4", date: "2026-11-05", start: "16:30", end: "17:00", title: "个人待办：硬刷验收",
+          location: "Ganto 桌面", remind: "无", urgency: "normal", track: "local", done: false,
+          note: "打开演示.bat" },
+        { id: "e5", date: "2026-11-05", start: "19:00", end: "19:20", title: "用量周报草稿（可选）",
+          location: "—", remind: "无", urgency: "low", track: "local", done: false, note: "低优" },
+        { id: "e6", date: "2026-11-04", start: "10:00", end: "10:45", title: "成员开座位 mock 验收",
+          location: "门户 · 成员页", remind: "开始前 10 分", urgency: "normal", track: "local", done: true,
+          note: "已完成示例" },
+        { id: "e7", date: "2026-11-06", start: "09:30", end: "10:00", title: "合入人闸复查",
+          location: "工程台", remind: "开始前 1 天", urgency: "high", track: "team", done: false, note: "待 Bai" },
+        { id: "e8", date: "2026-11-07", start: "08:00", end: "08:30", title: "立冬 · 团队简报",
+          location: "团队频道", remind: "开始前 15 分", urgency: "normal", track: "team", done: false, note: "节气日" },
+        { id: "e9", date: "2026-11-22", start: "15:00", end: "16:00", title: "小雪节点回顾",
+          location: "—", remind: "无", urgency: "low", track: "local", done: false, note: "节气假事件" }
+      ];
+
+      function pad2(n) { return n < 10 ? "0" + n : String(n); }
+      function ymd(y, m0, d) { return y + "-" + pad2(m0 + 1) + "-" + pad2(d); }
+      function ymdFromDate(dt) { return ymd(dt.getFullYear(), dt.getMonth(), dt.getDate()); }
+      function parseYmd(s) {
+        var p = s.split("-");
+        return new Date(+p[0], +p[1] - 1, +p[2]);
+      }
+      function parseHM(hm) {
+        var p = hm.split(":");
+        return (+p[0]) * 60 + (+p[1]);
+      }
+      function hourOf(hm) { return Math.floor(parseHM(hm) / 60); }
+      function lunarLabel(key) {
+        if (LUNAR_MAP[key]) return LUNAR_MAP[key];
+        var d = parseYmd(key).getDate();
+        var cn = ["","初一","初二","初三","初四","初五","初六","初七","初八","初九","初十",
+          "十一","十二","十三","十四","十五","十六","十七","十八","十九","二十",
+          "廿一","廿二","廿三","廿四","廿五","廿六","廿七","廿八","廿九","三十"];
+        return cn[d] || "";
+      }
+
+      function updateHero() {
+        var dt = parseYmd(calSelected);
+        var hero = $("cal-hero-date");
+        var lunar = $("cal-hero-lunar");
+        if (hero) {
+          hero.textContent = (dt.getMonth() + 1) + "月" + dt.getDate() + "日，星期" + WEEKDAYS_FULL[dt.getDay()];
+        }
+        if (lunar) {
+          var HERO_LUNAR = { "2026-11-05": "九月廿七", "2026-11-07": "立冬", "2026-11-09": "十月", "2026-11-22": "小雪" };
+          lunar.textContent = HERO_LUNAR[calSelected] || lunarLabel(calSelected);
+        }
+        var axis = $("cal-axis-heading");
+        if (axis) {
+          axis.textContent = (dt.getMonth() + 1) + "月" + dt.getDate() + "日 · 日视图 07:00–22:00";
+        }
+      }
+
+      function renderMonthGrid() {
+        var grid = $("cal-month-grid");
+        var picker = $("cal-picker-grid");
+        var title = $("cal-month-title");
+        if (!grid || !title) return;
+        var y = calMonth.getFullYear();
+        var m0 = calMonth.getMonth();
+
+        if (calViewMode === "months") {
+          grid.classList.add("hidden");
+          if (picker) picker.classList.remove("hidden");
+          title.textContent = y + "年";
+          title.title = "点选年份";
+          var parts = [];
+          for (var m = 0; m < 12; m++) {
+            var on = (y === 2026 && m === 10) || (y === calMonth.getFullYear() && m === calMonth.getMonth() && calSelected.indexOf(ymd(y, m, 1).slice(0, 7)) === 0);
+            // highlight current cursor month
+            on = (m === m0);
+            parts.push('<button type="button" class="cal-picker-cell' + (on ? " on" : "") + '" data-pick-month="' + m + '">' + MONTH_NAMES[m] + "</button>");
+          }
+          if (picker) picker.innerHTML = parts.join("");
+          return;
+        }
+
+        if (calViewMode === "years") {
+          grid.classList.add("hidden");
+          if (picker) picker.classList.remove("hidden");
+          var start = Math.floor(y / 10) * 10;
+          title.textContent = start + "年 – " + (start + 9) + "年";
+          title.title = "返回选月";
+          var parts = [];
+          for (var yy = start - 1; yy <= start + 10; yy++) {
+            var cls = "cal-picker-cell";
+            if (yy < start || yy > start + 9) cls += " muted";
+            if (yy === y) cls += " on";
+            parts.push('<button type="button" class="' + cls + '" data-pick-year="' + yy + '">' + yy + "</button>");
+          }
+          if (picker) picker.innerHTML = parts.join("");
+          return;
+        }
+
+        // days
+        grid.classList.remove("hidden");
+        if (picker) { picker.classList.add("hidden"); picker.innerHTML = ""; }
+        title.textContent = y + "年" + (m0 + 1) + "月";
+        title.title = "点选月份 / 年份";
+        var first = new Date(y, m0, 1);
+        var startPad = (first.getDay() + 6) % 7;
+        var daysInMonth = new Date(y, m0 + 1, 0).getDate();
+        var prevDays = new Date(y, m0, 0).getDate();
+        var todayStr = "2026-11-05";
+        var parts = [];
+        WEEKDAYS_MON.forEach(function (d) {
+          parts.push('<div class="cal-dow">' + d + "</div>");
+        });
+        var cells = [];
+        for (var i = 0; i < startPad; i++) {
+          var d = prevDays - startPad + 1 + i;
+          var pm = m0 === 0 ? 11 : m0 - 1;
+          var py = m0 === 0 ? y - 1 : y;
+          cells.push({ y: py, m0: pm, d: d, out: true });
+        }
+        for (var d = 1; d <= daysInMonth; d++) {
+          cells.push({ y: y, m0: m0, d: d, out: false });
+        }
+        var nextD = 1;
+        while (cells.length < 42) {
+          var nm = m0 === 11 ? 0 : m0 + 1;
+          var ny = m0 === 11 ? y + 1 : y;
+          cells.push({ y: ny, m0: nm, d: nextD++, out: true });
+        }
+        cells.forEach(function (c) {
+          var key = ymd(c.y, c.m0, c.d);
+          var cls = "cal-cell";
+          if (c.out) cls += " out";
+          if (key === todayStr) cls += " today";
+          if (key === calSelected) cls += " selected";
+          var hasEv = calEvents.some(function (e) { return e.date === key; });
+          if (hasEv) cls += " has-ev";
+          var lu = lunarLabel(key);
+          var luCls = "cal-lunar" + (JIEQI[key] ? " jieqi" : "");
+          parts.push(
+            '<button type="button" class="' + cls + '" data-cal-day="' + key + '">' +
+            '<div class="cal-num">' + c.d + "</div>" +
+            '<div class="' + luCls + '">' + lu + "</div></button>"
+          );
+        });
+        grid.innerHTML = parts.join("");
+      }
+
+      function renderDayAxis() {
+        var root = $("cal-day");
+        var panel = $("cal-day-panel");
+        var showAxis = calAxisOpen && calViewMode === "days";
+        if (panel) panel.style.display = showAxis ? "" : "none";
+        var chev = $("btn-cal-expand");
+        if (chev) chev.textContent = calAxisOpen ? "▾" : "▸";
+        if (!root || !showAxis) return;
+        var key = calSelected;
+        var list = calEvents.filter(function (e) {
+          if (e.date !== key) return false;
+          if (calTrack !== "all" && e.track !== calTrack) return false;
+          return true;
+        });
+        var parts = [];
+        for (var h = 7; h <= 22; h++) {
+          var slotEvs = list.filter(function (e) { return hourOf(e.start) === h; });
+          parts.push('<div class="cal-hour-label">' + pad2(h) + ":00</div>");
+          parts.push('<div class="cal-hour-slot">');
+          if (!slotEvs.length) {
+            parts.push('<div class="cal-empty-slot">—</div>');
+          } else {
+            slotEvs.forEach(function (e) {
+              var urg = e.urgency || "normal";
+              var cls = "cal-evt u-" + urg + (e.done ? " done" : "");
+              parts.push('<div class="' + cls + '" data-eid="' + e.id + '">');
+              parts.push('<div class="cal-evt-top"><div>');
+              parts.push('<div class="cal-evt-title">' + e.title + "</div>");
+              parts.push('<div class="cal-evt-time">' + e.start + "–" + e.end + "</div></div>");
+              parts.push('<div class="cal-evt-actions">');
+              parts.push('<button type="button" class="sm" data-cal-act="done" data-eid="' + e.id + '">' +
+                (e.done ? "撤销" : "完成") + "</button>");
+              parts.push('<button type="button" class="sm danger" data-cal-act="remove" data-eid="' + e.id + '">删</button>');
+              parts.push("</div></div>");
+              parts.push('<div class="cal-evt-meta">');
+              parts.push('<span class="cal-tag ' + e.track + '">' + (e.track === "team" ? "团队" : "本地") + "</span>");
+              parts.push('<span class="cal-tag urg-' + urg + '">' + (URGENCY_LABEL[urg] || urg) + "</span>");
+              if (e.location) parts.push("<span>📍 " + e.location + "</span>");
+              if (e.remind) parts.push("<span>🔔 " + e.remind + "</span>");
+              if (e.note) parts.push("<span>" + e.note + "</span>");
+              parts.push("</div></div>");
+            });
+          }
+          parts.push("</div>");
+        }
+        root.innerHTML = parts.join("");
+      }
+
+      function renderCalendar() {
+        updateHero();
+        renderMonthGrid();
+        renderDayAxis();
+      }
+
+      function showTab(name) {
+        var tabs = ["overview","members","usage","announce","calendar","session","gates"];
+        tabs.forEach(function (t) {
+          var el = $("tab-" + t);
+          if (el) el.classList.toggle("hidden", t !== name);
+        });
+        document.querySelectorAll("#nav button[data-tab]").forEach(function (b) {
+          b.classList.toggle("active", b.getAttribute("data-tab") === name);
+        });
+        if (name === "calendar") renderCalendar();
+      }
+
+      function setAdminNav(isAdmin) {
+        ["nav-members","nav-announce"].forEach(function (id) {
+          var b = $(id);
+          if (!b) return;
+          b.disabled = !isAdmin;
+          b.title = isAdmin ? "" : "需要 admin";
+        });
+        var usage = $("nav-usage");
+        if (usage) { usage.disabled = false; usage.title = ""; }
+        var calNav = $("nav-calendar");
+        if (calNav) { calNav.disabled = false; calNav.title = ""; }
+        $("nav-hint").textContent = isAdmin
+          ? "admin：可看管理入口（mock）"
+          : "member：用量/日历可看；成员/公告管理需 admin";
+      }
+
+      function render() {
+        var session = readSession();
+        var loginCard = $("login-card");
+        var appCard = $("app-card");
+        var shell = $("shell");
+        var stage = $("stage");
+        var brand = $("login-brand");
+        var foot = $("login-foot");
+        if (!session) {
+          loginCard.classList.remove("hidden");
+          appCard.classList.add("hidden");
+          brand.classList.remove("hidden");
+          foot.classList.remove("hidden");
+          shell.classList.remove("app");
+          stage.classList.remove("app-mode");
+          showPortal();
+          return;
+        }
+        loginCard.classList.add("hidden");
+        appCard.classList.remove("hidden");
+        brand.classList.add("hidden");
+        foot.classList.add("hidden");
+        shell.classList.add("app");
+        stage.classList.add("app-mode");
+        $("who-name").textContent = session.displayName || session.user;
+        $("session-view").textContent = JSON.stringify(session, null, 2);
+        var pill = $("role-pill");
+        pill.textContent = session.role || "none";
+        pill.className = "pill " + (session.role === "admin" ? "admin" : session.role === "member" ? "member" : "none");
+        var isAdmin = session.role === "admin";
+        $("overview-admin").classList.toggle("hidden", !isAdmin);
+        $("overview-member").classList.toggle("hidden", isAdmin);
+        $("usage-stats-admin").classList.toggle("hidden", !isAdmin);
+        $("usage-stats-member").classList.toggle("hidden", isAdmin);
+        $("usage-table-admin").classList.toggle("hidden", !isAdmin);
+        $("usage-table-member").classList.toggle("hidden", isAdmin);
+        $("usage-charts-admin").classList.toggle("hidden", !isAdmin);
+        $("usage-charts-member").classList.toggle("hidden", isAdmin);
+        $("usage-hist-admin").classList.toggle("hidden", !isAdmin);
+        $("usage-hist-admin-calls").classList.toggle("hidden", !isAdmin);
+        $("usage-hist-member").classList.toggle("hidden", isAdmin);
+        $("usage-hist-member-calls").classList.toggle("hidden", isAdmin);
+        $("usage-lede").textContent = isAdmin ? "团队图表 + 明细 + 历史 · mock" : "个人图表 + 明细 + 历史 · mock";
+        setAdminNav(isAdmin);
+        showPortal();
+        showTab("overview");
+      }
+
+      function login() {
+        var user = ($("user").value || "").trim();
+        var pass = $("pass").value || "";
+        $("login-err").textContent = "";
+        var acct = USERS[user];
+        if (!acct || acct.password !== pass) {
+          $("login-err").textContent = "用户未知或密码错误";
+          writeSession(null);
+          render();
+          return;
+        }
+        writeSession({
+          id: uid(),
+          user: user,
+          displayName: acct.displayName,
+          role: acct.role,
+          issuedAt: new Date().toISOString(),
+          source: "anywork-portal-auth-demo-mock",
+        });
+        $("pass").value = "";
+        render();
+      }
+
+      function logout() {
+        writeSession(null);
+        $("login-err").textContent = "";
+        render();
+      }
+
+      function tryAdmin(targetId) {
+        var s = readSession();
+        var el = $(targetId);
+        if (!s || !s.role) {
+          el.innerHTML = '<span class="no">拒绝 · 无角色</span>';
+          return;
+        }
+        if (s.role === "admin") {
+          el.innerHTML = '<span class="ok">允许 · admin</span>';
+        } else {
+          el.innerHTML = '<span class="no">拒绝 · ' + s.role + '</span>';
+        }
+      }
+
+      function tryMember(targetId) {
+        var s = readSession();
+        var el = $(targetId);
+        if (!s || !s.role) {
+          el.innerHTML = '<span class="no">拒绝 · 无角色</span>';
+          return;
+        }
+        if (s.role === "admin" || s.role === "member") {
+          el.innerHTML = '<span class="ok">允许 · ' + s.role + '</span>';
+        } else {
+          el.innerHTML = '<span class="no">拒绝 · ' + s.role + '</span>';
+        }
+      }
+
+      $("btn-login").addEventListener("click", login);
+      $("btn-logout").addEventListener("click", logout);
+      $("btn-admin-zone").addEventListener("click", function () { tryAdmin("admin-status"); });
+      $("btn-member-zone-2").addEventListener("click", function () { tryMember("member-status"); });
+      $("btn-member-zone").addEventListener("click", function () { tryMember("member-status-home"); });
+      $("btn-admin-zone-member").addEventListener("click", function () { tryAdmin("admin-status-member"); });
+      $("btn-mock-budget").addEventListener("click", function () {
+        $("admin-only-status").innerHTML = '<span class="ok">mock：预算 +10%（未写库）</span>';
+      });
+      $("btn-mock-disable").addEventListener("click", function () {
+        $("admin-only-status").innerHTML = '<span class="ok">mock：已标记 test001 停用（未写库）</span>';
+      });
+      $("btn-fill-admin").addEventListener("click", function () {
+        $("user").value = "admin"; $("pass").value = "admin";
+      });
+      $("btn-fill-member").addEventListener("click", function () {
+        $("user").value = "member"; $("pass").value = "member";
+      });
+      $("pass").addEventListener("keydown", function (e) { if (e.key === "Enter") login(); });
+      $("user").addEventListener("keydown", function (e) { if (e.key === "Enter") login(); });
+
+      document.querySelectorAll("#nav button[data-tab]").forEach(function (b) {
+        b.addEventListener("click", function () {
+          if (b.disabled) return;
+          var s = readSession();
+          var tab = b.getAttribute("data-tab");
+          var adminOnly = { members:1, announce:1 };
+          if (adminOnly[tab] && (!s || s.role !== "admin")) return;
+          showTab(tab);
+        });
+      });
+
+
+
+      $("btn-reg-member").addEventListener("click", registerMember);
+      $("btn-refresh-seats").addEventListener("click", refreshSeats);
+      $("reg-user").addEventListener("keydown", function (e) { if (e.key === "Enter") registerMember(); });
+      $("btn-reset-members").addEventListener("click", function () {
+        Object.keys(bootTimers).forEach(function (k) { clearTimeout(bootTimers[k]); });
+        bootTimers = {};
+        nextPort = 3306;
+        localStorage.removeItem(MEMBERS_KEY);
+        renderMembers();
+        setMemberNote("已重置为默认 mock 列表");
+      });
+      $("members-tbody").addEventListener("click", function (e) {
+        var btn = e.target.closest("button[data-act]");
+        if (!btn) return;
+        var act = btn.getAttribute("data-act");
+        var id = btn.getAttribute("data-id");
+        if (act === "boot") bootSeat(id);
+        else if (act === "stop") stopSeat(id);
+        else if (act === "delete") deleteMember(id);
+      });
+
+
+      $("btn-cal-prev").addEventListener("click", function () {
+        if (calViewMode === "years") {
+          calMonth = new Date(calMonth.getFullYear() - 10, calMonth.getMonth(), 1);
+        } else if (calViewMode === "months") {
+          calMonth = new Date(calMonth.getFullYear() - 1, calMonth.getMonth(), 1);
+        } else {
+          calMonth = new Date(calMonth.getFullYear(), calMonth.getMonth() - 1, 1);
+        }
+        renderCalendar();
+      });
+      $("btn-cal-next").addEventListener("click", function () {
+        if (calViewMode === "years") {
+          calMonth = new Date(calMonth.getFullYear() + 10, calMonth.getMonth(), 1);
+        } else if (calViewMode === "months") {
+          calMonth = new Date(calMonth.getFullYear() + 1, calMonth.getMonth(), 1);
+        } else {
+          calMonth = new Date(calMonth.getFullYear(), calMonth.getMonth() + 1, 1);
+        }
+        renderCalendar();
+      });
+      $("btn-cal-today").addEventListener("click", function () {
+        calMonth = new Date(2026, 10, 1);
+        calSelected = "2026-11-05";
+        calViewMode = "days";
+        calAxisOpen = true;
+        renderCalendar();
+      });
+      $("btn-cal-expand").addEventListener("click", function () {
+        calAxisOpen = !calAxisOpen;
+        renderDayAxis();
+      });
+      $("cal-month-title").addEventListener("click", function () {
+        if (calViewMode === "days") calViewMode = "months";
+        else if (calViewMode === "months") calViewMode = "years";
+        else calViewMode = "months";
+        renderCalendar();
+      });
+      $("cal-picker-grid").addEventListener("click", function (e) {
+        var mb = e.target.closest("[data-pick-month]");
+        if (mb) {
+          calMonth = new Date(calMonth.getFullYear(), +mb.getAttribute("data-pick-month"), 1);
+          calViewMode = "days";
+          renderCalendar();
+          return;
+        }
+        var yb = e.target.closest("[data-pick-year]");
+        if (yb) {
+          calMonth = new Date(+yb.getAttribute("data-pick-year"), calMonth.getMonth(), 1);
+          calViewMode = "months";
+          renderCalendar();
+        }
+      });
+      $("cal-month-grid").addEventListener("click", function (e) {
+        var cell = e.target.closest("[data-cal-day]");
+        if (!cell) return;
+        calSelected = cell.getAttribute("data-cal-day");
+        var p = calSelected.split("-");
+        calMonth = new Date(+p[0], +p[1] - 1, 1);
+        calViewMode = "days";
+        calAxisOpen = true;
+        renderCalendar();
+      });
+      $("cal-track-filter").addEventListener("click", function (e) {
+        var b = e.target.closest("button[data-track]");
+        if (!b) return;
+        calTrack = b.getAttribute("data-track");
+        document.querySelectorAll("#cal-track-filter button").forEach(function (x) {
+          x.classList.toggle("on", x === b);
+        });
+        renderDayAxis();
+      });
+      $("cal-day").addEventListener("click", function (e) {
+        var btn = e.target.closest("button[data-cal-act]");
+        if (!btn) return;
+        var id = btn.getAttribute("data-eid");
+        var act = btn.getAttribute("data-cal-act");
+        if (act === "done") {
+          calEvents.forEach(function (ev) {
+            if (ev.id === id) ev.done = !ev.done;
+          });
+        } else if (act === "remove") {
+          calEvents = calEvents.filter(function (ev) { return ev.id !== id; });
+        }
+        renderCalendar();
+      });
+
+      $("btn-enter-workbench").addEventListener("click", showWorkbench);
+      $("btn-back-portal").addEventListener("click", showPortal);
+      document.querySelectorAll("[data-enter-wb]").forEach(function (b) {
+        b.addEventListener("click", showWorkbench);
+      });
+
+      render();
+    })();
+  </script>
+</body>
+</html>

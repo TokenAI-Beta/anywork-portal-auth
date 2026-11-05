@@ -1,0 +1,8 @@
+# anywork-portal-auth：门户登录 / desk_session / 角色闸（壳 v0）。
+# 槽位 id portal-auth，与资料库 ziliaoku / desk-hub 分开。
+# 本刀 demo 不装进现网 DSH；安装示例仅供以后：
+#   dsh plugin --profile web add ./anywork-portal-auth-0.1.0.tgz
+# `--profile` 写在子命令前面。
+- insert:
+    - id: portal-auth
+      name: 'anywork-portal-auth'
