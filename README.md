@@ -45,7 +45,7 @@ demo/index.html
 
 ```sh
 npm pack
-dsh plugin --profile web add ./anywork-portal-auth-0.1.0.tgz
+dsh plugin --profile web add ./anywork-portal-auth-0.1.1.tgz
 ```
 
 `--profile` 写在子命令前面。装上或卸下之后重启实例。

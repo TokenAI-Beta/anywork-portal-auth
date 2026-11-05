@@ -1,6 +1,6 @@
 {
   "name": "anywork-portal-auth",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "private": true,
   "description": "Anywork 门户登录 / desk_session / 角色闸 / 门户后页 / 进入工作台 / 日历（DSH Web 插件 · 壳 v0）",
   "license": "MIT",
