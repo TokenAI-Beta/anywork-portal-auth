@@ -1,8 +1,8 @@
 # anywork-portal-auth
 
-Anywork 团队门户 · DSH Web 插件 **0.2.0（真 client）**。
+Anywork 团队门户 · DSH Web 插件 **0.2.1（真 client · 进站默认开门户）**。
 
-侧栏注入 `sidebar.footer.action`，槽位 id **`portal-auth`**，标签「门户」。面板覆盖：登录 / `desk_session` / 角色闸 · 总览 · 成员（座位 mock）· 用量（图表+历史）· 公告 · 日历（月历 + 07–22 日轴 + 年月跳选）·「进入工作台」二次视图。数据为浏览器 localStorage mock，不接现网门户 cookie。
+侧栏注入 `sidebar.footer.action`，槽位 id **`portal-auth`**，标签「门户」。**进站默认开门户**（装载后自动 open 面板，等同点侧栏「门户」；仍可「进入工作台」/返回对话）。面板覆盖：登录 / `desk_session` / 角色闸 · 总览 · 成员（座位 mock）· 用量（图表+历史）· 公告 · 日历（月历 + 07–22 日轴 + 年月跳选）·「进入工作台」二次视图。数据为浏览器 localStorage mock，不接现网门户 cookie。
 
 Host `lib/index.js` 的 `apply` 仍为空（无 host 路由，对齐 library-plugin 的 host-half stub）。Client `lib/client.js` 导出 `apply` 函数（Cordis/HARNESS 要求 function 或带 `apply` 的对象）。
 
@@ -30,7 +30,7 @@ demo/index.html
 
 登录后面板展示伪造 `desk_session`（`id` / `user` / `role` / `issuedAt`）。登出清空 localStorage 并回到登录页。
 
-## 能力清单（0.2.0 真 client）
+## 能力清单（0.2.1 真 client）
 
 插件侧栏「门户」面板（`ctx.slots.inject("sidebar.footer.action")` · `id: portal-auth`）：
 
@@ -46,7 +46,7 @@ demo/index.html
 
 ## 包骨架
 
-- `package.json` — name **`anywork-portal-auth`**, version **0.2.0**, private, `type: module`, `engines.node >=20`, `engines.dsh >=0.2.1-rc.3 <0.3.0`
+- `package.json` — name **`anywork-portal-auth`**, version **0.2.1**, private, `type: module`, `engines.node >=20`, `engines.dsh >=0.2.1-rc.3 <0.3.0`
 - `cordis.patch.yml` — 槽位 id `portal-auth`（与 `ziliaoku` / desk-hub 分开）
 - `lib/index.js` — 宿主空 `apply`（无 host 路由）
 - `lib/client.js` — 真 client：ModuleLoader + `require("react")` + `exports.apply`
@@ -59,7 +59,7 @@ demo/index.html
 
 ```sh
 npm pack
-dsh plugin --profile web add ./anywork-portal-auth-0.2.0.tgz
+dsh plugin --profile web add ./anywork-portal-auth-0.2.1.tgz
 ```
 
 `--profile` 写在子命令前面。装上或卸下之后重启实例。
