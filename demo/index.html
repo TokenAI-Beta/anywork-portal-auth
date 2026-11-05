@@ -502,6 +502,25 @@
     .cal-empty-slot { font-size: 0.65rem; color: #3a3550; padding: 2px 0; }
     .cal-note { margin-top: 10px; font-size: 0.7rem; color: #6a6484; line-height: 1.4; }
 
+    .announce-toolbar { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:14px; align-items:flex-start; }
+    .announce-toolbar input, .announce-toolbar textarea {
+      flex:1; min-width:160px; padding:8px 10px; border-radius:8px;
+      border:1px solid var(--border-strong); background:var(--bg); color:var(--text);
+      font:inherit; font-size:0.85rem;
+    }
+    .announce-toolbar textarea { min-height:64px; resize:vertical; width:100%; flex-basis:100%; }
+    .announce-item .row-actions { margin-top:8px; display:flex; gap:6px; flex-wrap:wrap; }
+    .announce-item.pinned { border-color:#3d3566; background:linear-gradient(180deg,#16131f,#111113); }
+    .announce-item .pin-badge {
+      display:inline-block; font-size:0.62rem; font-weight:600; color:#c4b5fd;
+      border:1px solid #3d3566; background:#1a1530; border-radius:999px; padding:1px 7px; margin-right:6px;
+    }
+    .announce-empty { color:var(--faint); font-size:0.85rem; padding:12px 0; }
+    .wb-chat-item { cursor:pointer; }
+    .wb-chat-item:hover { background:#1c1c20; }
+    .wb-composer input:not(:disabled) { opacity:1; }
+    .ov-stat-note { font-size:0.7rem; color:var(--faint); margin-top:8px; }
+
   </style>
 </head>
 <body>
@@ -510,7 +529,7 @@
       <div id="login-brand" class="brand">
         <div class="mark">PA</div>
         <h1>Portal Auth</h1>
-        <p>登录与角色闸 · demo v0</p>
+        <p>登录 · 角色闸 · 门户 · 工作台 · demo</p>
       </div>
 
       <section id="login-card" class="card">
@@ -564,12 +583,13 @@
               <div id="overview-admin">
                 <h2>管理总览</h2>
                 <p class="lede">假数据面板 · 演示 admin 进门后的门户感（非真实 API）</p>
-                <div class="stats">
-                  <div class="stat"><div class="k">座位</div><div class="v">5</div><div class="s">4 在线 · 1 停用</div></div>
+                <div class="stats" id="overview-stats">
+                  <div class="stat"><div class="k">座位</div><div class="v" id="ov-seat-total">5</div><div class="s" id="ov-seat-sub">4 在线 · 1 停用</div></div>
                   <div class="stat"><div class="k">本月用量</div><div class="v">128.4</div><div class="s">万 token · 预算 62%</div></div>
-                  <div class="stat"><div class="k">座位健康</div><div class="v">4/5</div><div class="s">在线 · mock</div></div>
-                  <div class="stat"><div class="k">公告</div><div class="v">3</div><div class="s">1 置顶</div></div>
+                  <div class="stat"><div class="k">座位健康</div><div class="v" id="ov-health-v">4/5</div><div class="s" id="ov-health-s">在线 · mock</div></div>
+                  <div class="stat"><div class="k">公告</div><div class="v" id="ov-ann-v">3</div><div class="s" id="ov-ann-s">1 置顶</div></div>
                 </div>
+                <div class="ov-stat-note" id="ov-stat-note">座位 / 公告数字跟成员页与公告板联动（mock）</div>
 
                 <div class="wb-enter-card">
                   <div class="wb-copy">
@@ -583,12 +603,7 @@
                     <h3>最近成员</h3>
                     <table>
                       <thead><tr><th>用户</th><th>角色</th><th>状态</th></tr></thead>
-                      <tbody>
-                        <tr><td>admin001</td><td>admin</td><td><span class="tag on">在线</span></td></tr>
-                        <tr><td>cth</td><td>member</td><td><span class="tag on">在线</span></td></tr>
-                        <tr><td>test001</td><td>member</td><td><span class="tag wait">空闲</span></td></tr>
-                        <tr><td>yk</td><td>member</td><td><span class="tag on">在线</span></td></tr>
-                      </tbody>
+                      <tbody id="overview-recent-members"></tbody>
                     </table>
                   </div>
                   <div class="panel">
@@ -610,7 +625,7 @@
               <div id="overview-member" class="hidden">
                 <h2>成员总览</h2>
                 <p class="lede">你是 member · 管理入口已闸住</p>
-                <div class="member-banner member">成员视图：可看个人用量；成员/公告管理需 admin。</div>
+                <div class="member-banner member">成员视图：可看个人用量与公告；成员管理需 admin。</div>
                 <div class="stats">
                   <div class="stat"><div class="k">我的用量</div><div class="v">12.1</div><div class="s">万 token · 本月</div></div>
                   <div class="stat"><div class="k">配额</div><div class="v">24%</div><div class="s">本月已用</div></div>
@@ -928,23 +943,18 @@
 
             <div id="tab-announce" class="hidden">
               <h2>公告</h2>
-              <p class="lede">mock 公告板</p>
+              <p class="lede" id="announce-lede">全员可读 · admin 可发布 / 置顶 / 删除（mock）</p>
               <div class="panel">
-                <div class="announce-item">
-                  <div class="t">置顶 · 周五演示窗口</div>
-                  <div class="m">港机勿擅自改；本机 Docker-only。</div>
-                  <div class="d">2026-11-05 · admin001</div>
+                <div class="announce-toolbar hidden" id="announce-admin-bar">
+                  <input id="ann-title" placeholder="标题" maxlength="80" />
+                  <textarea id="ann-body" placeholder="正文（mock，不写现网）" maxlength="500"></textarea>
+                  <label style="display:flex;align-items:center;gap:6px;font-size:0.78rem;color:var(--muted);white-space:nowrap">
+                    <input type="checkbox" id="ann-pin" style="width:auto" /> 置顶
+                  </label>
+                  <button type="button" class="sm primary" id="btn-ann-publish" style="flex:0">发布公告</button>
                 </div>
-                <div class="announce-item">
-                  <div class="t">资料库共享说明</div>
-                  <div class="m">drive/kb 为门户全员共享卷，非按座位隔离。</div>
-                  <div class="d">2026-11-02 · admin001</div>
-                </div>
-                <div class="announce-item">
-                  <div class="t">xlsx 预览已知问题</div>
-                  <div class="m">documentpreview 自 10-29 起禁用 Iterator 相关崩溃。</div>
-                  <div class="d">2026-11-02 · admin001</div>
-                </div>
+                <div id="announce-list"></div>
+                <div class="members-note" id="announce-note">member 只读；admin 可管理。localStorage 持久，可重置。</div>
               </div>
             </div>
 
@@ -1036,48 +1046,33 @@
             </div>
           </div>
           <div class="wb-body">
-            <aside class="wb-rail">
+            <aside class="wb-rail" id="wb-rail">
               <h3>会话</h3>
-              <div class="wb-chat-item active">
+              <div class="wb-chat-item active" data-wb-chat="welcome">
                 <div class="n">欢迎</div>
                 <div class="p">今天想从哪开始？</div>
               </div>
-              <div class="wb-chat-item">
+              <div class="wb-chat-item" data-wb-chat="weekly">
                 <div class="n">周报草稿</div>
                 <div class="p">mock · 假会话</div>
               </div>
-              <div class="wb-chat-item">
+              <div class="wb-chat-item" data-wb-chat="kb">
                 <div class="n">资料库速查</div>
                 <div class="p">mock · 假会话</div>
               </div>
             </aside>
             <div class="wb-main">
-              <div class="wb-welcome">
+              <div class="wb-welcome" id="wb-welcome">
                 <div class="mark">WB</div>
-                <h2>已进入工作台</h2>
-                <p>这是 demo 内的座位桌面占位页，不连接真实座位端口。点右上角「返回门户」回到总览 / 成员 / 用量。</p>
+                <h2 id="wb-thread-title">已进入工作台</h2>
+                <p id="wb-thread-sub">这是 demo 内的座位桌面占位页，不连接真实座位端口。左侧可切换会话；下方可发 mock 消息。</p>
               </div>
-              <div class="wb-fake-thread">
-                <div class="wb-msg">
-                  <div class="wb-av">PA</div>
-                  <div class="wb-bubble">
-                    <div class="who">Portal Auth · mock</div>
-                    <div class="txt">你好，这里是假会话区。登录角色与 desk_session 逻辑未改。</div>
-                  </div>
-                </div>
-                <div class="wb-msg">
-                  <div class="wb-av">你</div>
-                  <div class="wb-bubble">
-                    <div class="who">你</div>
-                    <div class="txt">（示例）帮我打开本周待办。</div>
-                  </div>
-                </div>
-              </div>
+              <div class="wb-fake-thread" id="wb-thread"></div>
               <div class="wb-composer">
-                <input disabled placeholder="假输入框 · 本 demo 不下真消息" />
-                <button class="sm primary" type="button" disabled style="flex:0;opacity:.45">发送</button>
+                <input id="wb-input" placeholder="输入 mock 消息（仅本页，不下真）" />
+                <button class="sm primary" type="button" id="btn-wb-send" style="flex:0">发送</button>
               </div>
-              <div class="wb-note">视觉延续深色 Linear / DSH 风 · 港 / lnk / 现网未动</div>
+              <div class="wb-note">视觉延续深色 Linear / DSH 风 · 港 / lnk / 现网未动 · composer 为本地 mock</div>
             </div>
           </div>
         </div>
@@ -1147,6 +1142,7 @@
         var tbody = $("members-tbody");
         if (!tbody) return;
         var list = loadMembers();
+        renderOverviewFromMembers();
         if (!list.length) {
           tbody.innerHTML = '<tr><td colspan="6" style="color:var(--faint)">暂无成员 · 可上方注册</td></tr>';
           return;
@@ -1291,6 +1287,191 @@
       }
 
 
+
+      var ANN_KEY = "anywork_portal_auth_demo_announcements";
+      var DEFAULT_ANNS = [
+        { id: "a1", title: "周五演示窗口", body: "港机勿擅自改；本机 Docker-only。", author: "admin001", at: "2026-11-05", pinned: true },
+        { id: "a2", title: "资料库共享说明", body: "drive/kb 为门户全员共享卷，非按座位隔离。", author: "admin001", at: "2026-11-02", pinned: false },
+        { id: "a3", title: "xlsx 预览已知问题", body: "documentpreview 自 10-29 起禁用 Iterator 相关崩溃。", author: "admin001", at: "2026-11-02", pinned: false }
+      ];
+      function loadAnns() {
+        try {
+          var raw = localStorage.getItem(ANN_KEY);
+          if (raw) return JSON.parse(raw);
+        } catch (e) {}
+        return DEFAULT_ANNS.map(function (a) { return Object.assign({}, a); });
+      }
+      function saveAnns(list) { localStorage.setItem(ANN_KEY, JSON.stringify(list)); }
+      function setAnnNote(msg) {
+        var n = $("announce-note");
+        if (n) n.textContent = msg;
+      }
+      function renderAnnouncements() {
+        var listEl = $("announce-list");
+        if (!listEl) return;
+        var s = readSession();
+        var isAdmin = s && s.role === "admin";
+        var bar = $("announce-admin-bar");
+        if (bar) bar.classList.toggle("hidden", !isAdmin);
+        var lede = $("announce-lede");
+        if (lede) lede.textContent = isAdmin
+          ? "admin：可发布 / 置顶 / 删除 · mock localStorage"
+          : "全员可读 · 管理需 admin";
+        var list = loadAnns().slice().sort(function (a, b) {
+          if (a.pinned !== b.pinned) return a.pinned ? -1 : 1;
+          return (b.at || "").localeCompare(a.at || "");
+        });
+        if (!list.length) {
+          listEl.innerHTML = '<div class="announce-empty">暂无公告 · admin 可上方发布</div>';
+          return;
+        }
+        listEl.innerHTML = list.map(function (a) {
+          var pin = a.pinned ? '<span class="pin-badge">置顶</span>' : "";
+          var actions = "";
+          if (isAdmin) {
+            actions = '<div class="row-actions">' +
+              '<button type="button" class="sm" data-ann-act="pin" data-id="' + a.id + '">' +
+              (a.pinned ? "取消置顶" : "置顶") + "</button>" +
+              '<button type="button" class="sm danger" data-ann-act="del" data-id="' + a.id + '">删除</button>' +
+              "</div>";
+          }
+          return '<div class="announce-item' + (a.pinned ? " pinned" : "") + '">' +
+            '<div class="t">' + pin + a.title + "</div>" +
+            '<div class="m">' + a.body + "</div>" +
+            '<div class="d">' + (a.at || "") + " · " + (a.author || "admin") + "</div>" +
+            actions + "</div>";
+        }).join("");
+      }
+      function publishAnn() {
+        var s = readSession();
+        if (!s || s.role !== "admin") { setAnnNote("需要 admin"); return; }
+        var title = (($("ann-title") && $("ann-title").value) || "").trim();
+        var body = (($("ann-body") && $("ann-body").value) || "").trim();
+        var pin = $("ann-pin") && $("ann-pin").checked;
+        if (!title || !body) { setAnnNote("请填写标题与正文"); return; }
+        var list = loadAnns();
+        list.unshift({
+          id: "a_" + Math.random().toString(36).slice(2, 8),
+          title: title, body: body,
+          author: s.user || "admin",
+          at: "2026-11-05",
+          pinned: !!pin
+        });
+        saveAnns(list);
+        $("ann-title").value = "";
+        $("ann-body").value = "";
+        if ($("ann-pin")) $("ann-pin").checked = false;
+        renderAnnouncements();
+        renderOverviewFromMembers();
+        setAnnNote("已发布：" + title);
+      }
+      function toggleAnnPin(id) {
+        var list = loadAnns();
+        list.forEach(function (a) { if (a.id === id) a.pinned = !a.pinned; });
+        saveAnns(list);
+        renderAnnouncements();
+        renderOverviewFromMembers();
+        setAnnNote("已更新置顶");
+      }
+      function deleteAnn(id) {
+        if (!confirm("删除该公告？（仅 mock）")) return;
+        saveAnns(loadAnns().filter(function (a) { return a.id !== id; }));
+        renderAnnouncements();
+        renderOverviewFromMembers();
+        setAnnNote("已删除公告");
+      }
+
+      function seatStatusLabel(seat) {
+        if (seat === "up") return '<span class="tag on">在线</span>';
+        if (seat === "booting") return '<span class="tag boot">启动中</span>';
+        if (seat === "idle") return '<span class="tag wait">空闲</span>';
+        return '<span class="tag off">未开</span>';
+      }
+      function renderOverviewFromMembers() {
+        var list = loadMembers();
+        var total = list.length;
+        var up = list.filter(function (m) { return m.seat === "up"; }).length;
+        var idle = list.filter(function (m) { return m.seat === "idle"; }).length;
+        var off = list.filter(function (m) { return m.seat === "off" || m.seat === "booting"; }).length;
+        var t = $("ov-seat-total"); if (t) t.textContent = String(total);
+        var sub = $("ov-seat-sub"); if (sub) sub.textContent = up + " 在线 · " + idle + " 空闲 · " + off + " 未开/启动";
+        var hv = $("ov-health-v"); if (hv) hv.textContent = up + "/" + (total || 1);
+        var hs = $("ov-health-s"); if (hs) hs.textContent = "在线 · mock";
+        var anns = loadAnns();
+        var pinned = anns.filter(function (a) { return a.pinned; }).length;
+        var av = $("ov-ann-v"); if (av) av.textContent = String(anns.length);
+        var as_ = $("ov-ann-s"); if (as_) as_.textContent = pinned + " 置顶";
+        var tb = $("overview-recent-members");
+        if (tb) {
+          var recent = list.slice(0, 5);
+          tb.innerHTML = recent.map(function (m) {
+            return "<tr><td>" + m.id + "</td><td>" + m.role + "</td><td>" + seatStatusLabel(m.seat) + "</td></tr>";
+          }).join("") || '<tr><td colspan="3" style="color:var(--faint)">暂无成员</td></tr>';
+        }
+      }
+
+      var WB_THREADS = {
+        welcome: {
+          title: "欢迎",
+          sub: "座位桌面占位 · 不跳真实端口。可切换左侧会话或发送 mock 消息。",
+          seed: [
+            { who: "PA", av: "PA", txt: "你好，这里是假会话区。登录角色与 desk_session 逻辑未改。" },
+            { who: "你", av: "你", txt: "（示例）帮我打开本周待办。" }
+          ]
+        },
+        weekly: {
+          title: "周报草稿",
+          sub: "mock 会话 · 可续写假消息，不落现网。",
+          seed: [
+            { who: "PA", av: "PA", txt: "本周门户 auth demo：登录闸、成员开座位、用量图、日历日轴已齐。" },
+            { who: "你", av: "你", txt: "把日历年月跳选也写进周报。" }
+          ]
+        },
+        kb: {
+          title: "资料库速查",
+          sub: "mock · drive/kb 共享卷说明（非按座位隔离）。",
+          seed: [
+            { who: "PA", av: "PA", txt: "资料库路径 mock：/kb/shared · 全员可读。" },
+            { who: "你", av: "你", txt: "xlsx 预览还禁着吗？" },
+            { who: "PA", av: "PA", txt: "是，documentpreview Iterator 相关自 10-29 禁用。" }
+          ]
+        }
+      };
+      var wbChatId = "welcome";
+      var wbExtra = { welcome: [], weekly: [], kb: [] };
+
+      function renderWbThread() {
+        var meta = WB_THREADS[wbChatId] || WB_THREADS.welcome;
+        var title = $("wb-thread-title");
+        var sub = $("wb-thread-sub");
+        if (title) title.textContent = meta.title;
+        if (sub) sub.textContent = meta.sub;
+        document.querySelectorAll("#wb-rail [data-wb-chat]").forEach(function (el) {
+          el.classList.toggle("active", el.getAttribute("data-wb-chat") === wbChatId);
+        });
+        var thread = $("wb-thread");
+        if (!thread) return;
+        var msgs = (meta.seed || []).concat(wbExtra[wbChatId] || []);
+        thread.innerHTML = msgs.map(function (m) {
+          return '<div class="wb-msg"><div class="wb-av">' + m.av + '</div><div class="wb-bubble">' +
+            '<div class="who">' + m.who + '</div><div class="txt">' + m.txt + "</div></div></div>";
+        }).join("");
+      }
+      function sendWbMsg() {
+        var input = $("wb-input");
+        if (!input) return;
+        var txt = (input.value || "").trim();
+        if (!txt) return;
+        if (!wbExtra[wbChatId]) wbExtra[wbChatId] = [];
+        wbExtra[wbChatId].push({ who: "你", av: "你", txt: txt });
+        wbExtra[wbChatId].push({
+          who: "PA", av: "PA",
+          txt: "（mock 回执）已收到：" + (txt.length > 40 ? txt.slice(0, 40) + "…" : txt)
+        });
+        input.value = "";
+        renderWbThread();
+      }
+
       function showPortal() {
         var pv = $("portal-view");
         var wv = $("workbench-view");
@@ -1311,6 +1492,7 @@
         if (topEnter) topEnter.classList.add("hidden");
         var wbWho = $("wb-who");
         if (wbWho) wbWho.textContent = (s.displayName || s.user) + " · " + (s.role || "");
+        renderWbThread();
       }
 
 
@@ -1560,22 +1742,26 @@
           b.classList.toggle("active", b.getAttribute("data-tab") === name);
         });
         if (name === "calendar") renderCalendar();
+        if (name === "members") renderMembers();
+        if (name === "announce") renderAnnouncements();
+        if (name === "overview") renderOverviewFromMembers();
       }
 
       function setAdminNav(isAdmin) {
-        ["nav-members","nav-announce"].forEach(function (id) {
-          var b = $(id);
-          if (!b) return;
-          b.disabled = !isAdmin;
-          b.title = isAdmin ? "" : "需要 admin";
-        });
+        var mem = $("nav-members");
+        if (mem) {
+          mem.disabled = !isAdmin;
+          mem.title = isAdmin ? "" : "需要 admin";
+        }
+        var ann = $("nav-announce");
+        if (ann) { ann.disabled = false; ann.title = isAdmin ? "可管理公告" : "只读公告"; }
         var usage = $("nav-usage");
         if (usage) { usage.disabled = false; usage.title = ""; }
         var calNav = $("nav-calendar");
         if (calNav) { calNav.disabled = false; calNav.title = ""; }
         $("nav-hint").textContent = isAdmin
-          ? "admin：可看管理入口（mock）"
-          : "member：用量/日历可看；成员/公告管理需 admin";
+          ? "admin：成员管理 + 公告发布（mock）"
+          : "member：用量/日历/公告只读；成员管理需 admin";
       }
 
       function render() {
@@ -1622,6 +1808,9 @@
         $("usage-hist-member-calls").classList.toggle("hidden", isAdmin);
         $("usage-lede").textContent = isAdmin ? "团队图表 + 明细 + 历史 · mock" : "个人图表 + 明细 + 历史 · mock";
         setAdminNav(isAdmin);
+        renderMembers();
+        renderAnnouncements();
+        renderOverviewFromMembers();
         showPortal();
         showTab("overview");
       }
@@ -1690,10 +1879,34 @@
       $("btn-member-zone").addEventListener("click", function () { tryMember("member-status-home"); });
       $("btn-admin-zone-member").addEventListener("click", function () { tryAdmin("admin-status-member"); });
       $("btn-mock-budget").addEventListener("click", function () {
-        $("admin-only-status").innerHTML = '<span class="ok">mock：预算 +10%（未写库）</span>';
+        var list = loadMembers();
+        var hit = list.find(function (m) { return m.id === "test001"; });
+        if (hit) {
+          var n = parseInt(String(hit.budget).replace(/%/g, ""), 10);
+          if (isNaN(n)) n = 45;
+          n = Math.min(100, n + 10);
+          hit.budget = n + "%";
+          saveMembers(list);
+          renderMembers();
+          renderOverviewFromMembers();
+          $("admin-only-status").innerHTML = '<span class="ok">mock：test001 预算 → ' + hit.budget + '</span>';
+        } else {
+          $("admin-only-status").innerHTML = '<span class="no">test001 不在列表（可重置成员）</span>';
+        }
       });
       $("btn-mock-disable").addEventListener("click", function () {
-        $("admin-only-status").innerHTML = '<span class="ok">mock：已标记 test001 停用（未写库）</span>';
+        var list = loadMembers();
+        var hit = list.find(function (m) { return m.id === "test001"; });
+        if (hit) {
+          hit.seat = "off";
+          hit.port = null;
+          saveMembers(list);
+          renderMembers();
+          renderOverviewFromMembers();
+          $("admin-only-status").innerHTML = '<span class="ok">mock：已停用 test001 座位</span>';
+        } else {
+          $("admin-only-status").innerHTML = '<span class="no">test001 不在列表（可重置成员）</span>';
+        }
       });
       $("btn-fill-admin").addEventListener("click", function () {
         $("user").value = "admin"; $("pass").value = "admin";
@@ -1709,7 +1922,7 @@
           if (b.disabled) return;
           var s = readSession();
           var tab = b.getAttribute("data-tab");
-          var adminOnly = { members:1, announce:1 };
+          var adminOnly = { members:1 };
           if (adminOnly[tab] && (!s || s.role !== "admin")) return;
           showTab(tab);
         });
@@ -1824,6 +2037,25 @@
         }
         renderCalendar();
       });
+
+
+      $("btn-ann-publish").addEventListener("click", publishAnn);
+      $("announce-list").addEventListener("click", function (e) {
+        var btn = e.target.closest("button[data-ann-act]");
+        if (!btn) return;
+        var id = btn.getAttribute("data-id");
+        var act = btn.getAttribute("data-ann-act");
+        if (act === "pin") toggleAnnPin(id);
+        else if (act === "del") deleteAnn(id);
+      });
+      $("wb-rail").addEventListener("click", function (e) {
+        var item = e.target.closest("[data-wb-chat]");
+        if (!item) return;
+        wbChatId = item.getAttribute("data-wb-chat");
+        renderWbThread();
+      });
+      $("btn-wb-send").addEventListener("click", sendWbMsg);
+      $("wb-input").addEventListener("keydown", function (e) { if (e.key === "Enter") sendWbMsg(); });
 
       $("btn-enter-workbench").addEventListener("click", showWorkbench);
       $("btn-back-portal").addEventListener("click", showPortal);
