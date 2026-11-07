@@ -499,7 +499,16 @@
     .cal-evt-actions button.sm {
       background: #1a1726; border-color: #2e2a42; color: #c8c2dc; padding: 4px 8px;
     }
-    .cal-empty-slot { font-size: 0.65rem; color: #3a3550; padding: 2px 0; }
+    .cal-empty-slot {
+      font-size: 0.72rem; color: #6a6488; background: transparent; border: none;
+      padding: 2px 0; text-align: left; width: 100%;
+    }
+    .cal-hour-slot .cal-write {
+      width: 100%; background: transparent; border: none; color: var(--text);
+      padding: 2px 0; outline: none;
+    }
+    .cal-write-urg { display: flex; gap: 4px; flex-wrap: wrap; margin-top: 4px; }
+    .cal-write-urg button.on { color: var(--text); border-color: #8b87e6; }
     .cal-note { margin-top: 10px; font-size: 0.7rem; color: #6a6484; line-height: 1.4; }
 
     .announce-toolbar { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:14px; align-items:flex-start; }
@@ -528,8 +537,8 @@
     <div id="shell" class="shell">
       <div id="login-brand" class="brand">
         <div class="mark">PA</div>
-        <h1>Portal Auth</h1>
-        <p>登录 · 角色闸 · 门户 · 工作台 · demo</p>
+        <h1>成员登录</h1>
+        <p>Anywork 门户</p>
       </div>
 
       <section id="login-card" class="card">
@@ -543,11 +552,8 @@
         </div>
         <div class="actions">
           <button class="primary" id="btn-login" type="button">登录</button>
-          <button class="ghost" type="button" id="btn-fill-admin">admin</button>
-          <button class="ghost" type="button" id="btn-fill-member">member</button>
         </div>
         <div class="err" id="login-err"></div>
-        <div class="hint-line">试用 <code>admin</code> / <code>admin</code> 或 <code>member</code> / <code>member</code></div>
       </section>
 
       <section id="app-card" class="hidden">
@@ -574,8 +580,6 @@
             <button type="button" data-tab="usage" id="nav-usage">用量</button>
             <button type="button" data-tab="announce" id="nav-announce">公告</button>
             <button type="button" data-tab="calendar" id="nav-calendar">日历</button>
-            <button type="button" data-tab="session">desk_session</button>
-            <button type="button" data-tab="gates">角色闸</button>
             <div class="nav-hint" id="nav-hint"></div>
           </nav>
           <main class="main">
@@ -598,28 +602,12 @@
                   </div>
                   <button class="btn-enter-wb" type="button" data-enter-wb>进入工作台</button>
                 </div>
-                <div class="grid2">
-                  <div class="panel">
-                    <h3>最近成员</h3>
-                    <table>
-                      <thead><tr><th>用户</th><th>角色</th><th>状态</th></tr></thead>
-                      <tbody id="overview-recent-members"></tbody>
-                    </table>
-                  </div>
-                  <div class="panel">
-                    <h3>Admin-only</h3>
-                    <div class="gate-box" id="admin-only-box">
-                      <div style="font-size:0.9rem;font-weight:550;margin-bottom:6px">座位开通 / 预算闸</div>
-                      <div style="font-size:0.8rem;color:var(--muted);line-height:1.45;margin-bottom:12px">
-                        仅 admin 可见。此处为 mock：可调预算、停用座位（不下真单）。
-                      </div>
-                      <div style="display:flex;gap:8px;flex-wrap:wrap">
-                        <button class="sm" type="button" id="btn-mock-budget">调预算 +10%</button>
-                        <button class="sm" type="button" id="btn-mock-disable">停用 test001</button>
-                      </div>
-                      <div class="status" id="admin-only-status" style="margin-top:12px"></div>
-                    </div>
-                  </div>
+                <div class="panel">
+                  <h3>最近成员</h3>
+                  <table>
+                    <thead><tr><th>用户</th><th>角色</th><th>状态</th></tr></thead>
+                    <tbody id="overview-recent-members"></tbody>
+                  </table>
                 </div>
               </div>
               <div id="overview-member" class="hidden">
@@ -1001,40 +989,10 @@
                   <div class="cal-day" id="cal-day"></div>
                 </div>
               </div>
-              <div class="cal-note">月格选日 → 下方日轴跟选中日。假数据；港 / lnk / 现网未动。</div>
+              <div class="cal-note">点一天，再点下面空着的小时，就能写入这件事。</div>
             </div>
 
-            <div id="tab-session" class="hidden">
-              <h2>desk_session</h2>
-              <p class="lede">当前 mock 会话（localStorage）</p>
-              <div class="panel"><pre class="session" id="session-view"></pre></div>
-            </div>
-
-            <div id="tab-gates" class="hidden">
-              <h2>角色闸</h2>
-              <p class="lede">admin 进 / member 进 / 无角色拒</p>
-              <div class="grid2">
-                <div class="panel">
-                  <h3>Admin-only</h3>
-                  <div class="gate-box" id="gate-admin-box">
-                    <button class="sm" type="button" id="btn-admin-zone">尝试进入</button>
-                    <div class="status" id="admin-status"></div>
-                  </div>
-                </div>
-                <div class="panel">
-                  <h3>Member 区</h3>
-                  <div class="gate-box">
-                    <button class="sm" type="button" id="btn-member-zone-2">尝试进入</button>
-                    <div class="status" id="member-status"></div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </main>
-        </div>
-        </div><!-- /portal-view -->
-
-        <div id="workbench-view" class="hidden">
+            <div id="workbench-view" class="hidden">
           <div class="wb-bar">
             <div>
               <div class="wb-title">工作台</div>
@@ -1085,29 +1043,73 @@
   <script>
     (function () {
       var KEY = "anywork_portal_auth_demo_desk_session";
+      var INITIAL_PASSWORD = "qwer123";
       var USERS = {
-        admin: { password: "admin", role: "admin", displayName: "Admin Demo" },
+        admin001: { password: INITIAL_PASSWORD, role: "admin", displayName: "admin001" },
         member: { password: "member", role: "member", displayName: "Member Demo" },
       };
+
+      var remote = window.__ANYWORK_PORTAL_REMOTE__ === true;
+      var API = "/plugins/anywork-portal-auth";
+      var sessionCache = null;
+      var membersCache = null;
+      var annsCache = null;
+      var pushTimer = null;
 
       function uid() {
         return "ds_" + Math.random().toString(36).slice(2, 10) + Date.now().toString(36).slice(-4);
       }
       function readSession() {
+        if (remote) return sessionCache;
         try {
           var raw = localStorage.getItem(KEY);
           return raw ? JSON.parse(raw) : null;
         } catch (e) { return null; }
       }
       function writeSession(session) {
+        if (remote) { sessionCache = session; return; }
         if (!session) localStorage.removeItem(KEY);
         else localStorage.setItem(KEY, JSON.stringify(session));
+      }
+      function schedulePush() {
+        if (!remote) return;
+        if (pushTimer) clearTimeout(pushTimer);
+        pushTimer = setTimeout(function () {
+          pushTimer = null;
+          var s = readSession();
+          if (!s || s.role !== "admin") return;
+          fetch(API + "/state", {
+            method: "PUT",
+            credentials: "same-origin",
+            headers: { "content-type": "application/json" },
+            body: JSON.stringify({ members: membersCache || [], announcements: annsCache || [] }),
+          }).catch(function () {});
+        }, 40);
+      }
+      function hydrateState() {
+        return fetch(API + "/state", { credentials: "same-origin", cache: "no-store" })
+          .then(function (r) { return r.json(); })
+          .then(function (body) {
+            membersCache = body.members || [];
+            annsCache = body.announcements || [];
+          });
+      }
+      function watchBoot() {
+        if (!remote || !membersCache || !membersCache.some(function (m) { return m.seat === "booting"; })) return;
+        setTimeout(function () {
+          hydrateState().then(function () {
+            renderMembers();
+            renderOverviewFromMembers();
+            watchBoot();
+          }).catch(function () {});
+        }, 1500);
       }
       function $(id) { return document.getElementById(id); }
 
       var MEMBERS_KEY = "anywork_portal_auth_demo_members";
+      var ADMIN_ID = "admin001";
+      var ADMIN_PORT = 3301;
       var DEFAULT_MEMBERS = [
-        { id: "admin001", role: "admin", budget: "—", seat: "up", port: 3301 },
         { id: "cth", role: "member", budget: "80%", seat: "up", port: 3303 },
         { id: "test001", role: "member", budget: "45%", seat: "idle", port: 3302 },
         { id: "yk", role: "member", budget: "22%", seat: "up", port: 3304 },
@@ -1117,6 +1119,13 @@
       var bootTimers = {};
 
       function loadMembers() {
+        if (remote) {
+          if (!membersCache) membersCache = [];
+          membersCache.forEach(function (m) {
+            if (m.port && m.port >= nextPort) nextPort = m.port + 1;
+          });
+          return membersCache;
+        }
         try {
           var raw = localStorage.getItem(MEMBERS_KEY);
           if (raw) {
@@ -1130,7 +1139,58 @@
         return DEFAULT_MEMBERS.map(function (m) { return Object.assign({}, m); });
       }
       function saveMembers(list) {
+        if (remote) {
+          membersCache = list;
+          schedulePush();
+          return;
+        }
         localStorage.setItem(MEMBERS_KEY, JSON.stringify(list));
+      }
+      function adminPort(list) {
+        var used = {};
+        list.forEach(function (m) {
+          if (m.id !== ADMIN_ID && m.port) used[m.port] = true;
+        });
+        if (!used[ADMIN_PORT]) return ADMIN_PORT;
+        var port = nextPort;
+        while (used[port]) port++;
+        nextPort = port + 1;
+        return port;
+      }
+      // Portal start (install, then restart): ensure admin001 and bring the instance up.
+      function pullAdmin001() {
+        if (remote) return;
+        var list = loadMembers();
+        var m = null;
+        for (var i = 0; i < list.length; i++) {
+          if (list[i].id === ADMIN_ID) m = list[i];
+        }
+        if (!m) {
+          m = { id: ADMIN_ID, role: "admin", budget: "—", seat: "off", port: null };
+          list.unshift(m);
+        }
+        m.role = "admin";
+        if (m.seat === "up" && m.port) {
+          saveMembers(list);
+          return;
+        }
+        m.seat = "booting";
+        m.port = null;
+        saveMembers(list);
+        if (bootTimers[ADMIN_ID]) clearTimeout(bootTimers[ADMIN_ID]);
+        bootTimers[ADMIN_ID] = setTimeout(function () {
+          var list2 = loadMembers();
+          var m2 = null;
+          for (var j = 0; j < list2.length; j++) {
+            if (list2[j].id === ADMIN_ID) m2 = list2[j];
+          }
+          if (!m2 || m2.seat !== "booting") return;
+          m2.role = "admin";
+          m2.seat = "up";
+          m2.port = adminPort(list2);
+          saveMembers(list2);
+          renderMembers();
+        }, 1200);
       }
       function seatTag(seat) {
         if (seat === "up") return '<span class="tag on">已开</span>';
@@ -1283,7 +1343,7 @@
         saveMembers(list);
         input.value = "";
         renderMembers();
-        setMemberNote("已注册 " + name + "（未开座位）· 可点「开座位」provision");
+        setMemberNote("已注册 " + name + "（未开座位）· 登录密码 member");
       }
 
 
@@ -1295,13 +1355,21 @@
         { id: "a3", title: "xlsx 预览已知问题", body: "documentpreview 自 10-29 起禁用 Iterator 相关崩溃。", author: "admin001", at: "2026-11-02", pinned: false }
       ];
       function loadAnns() {
+        if (remote) return annsCache || [];
         try {
           var raw = localStorage.getItem(ANN_KEY);
           if (raw) return JSON.parse(raw);
         } catch (e) {}
         return DEFAULT_ANNS.map(function (a) { return Object.assign({}, a); });
       }
-      function saveAnns(list) { localStorage.setItem(ANN_KEY, JSON.stringify(list)); }
+      function saveAnns(list) {
+        if (remote) {
+          annsCache = list;
+          schedulePush();
+          return;
+        }
+        localStorage.setItem(ANN_KEY, JSON.stringify(list));
+      }
       function setAnnNote(msg) {
         var n = $("announce-note");
         if (n) n.textContent = msg;
@@ -1484,6 +1552,18 @@
       function showWorkbench() {
         var s = readSession();
         if (!s) return;
+        if (remote) {
+          try { sessionStorage.setItem("anywork-portal-auth-in-workbench", "1"); } catch (e) {}
+          if (window.parent && window.parent !== window) {
+            window.parent.postMessage({
+              type: "anywork-portal-auth:enter-workbench",
+              user: s.user
+            }, window.location.origin);
+            return;
+          }
+          window.location.assign("/");
+          return;
+        }
         var pv = $("portal-view");
         var wv = $("workbench-view");
         if (pv) pv.classList.add("hidden");
@@ -1524,7 +1604,8 @@
       };
       var JIEQI = { "2026-11-07":1, "2026-11-22":1 };
 
-      var calEvents = [
+      var CAL_KEY = "anywork_portal_auth_calendar_events";
+      var CAL_DEFAULTS = [
         { id: "e1", date: "2026-11-05", start: "09:00", end: "09:30", title: "港机 guest-shutdown RO 回顾",
           location: "远程 · 港机", remind: "开始前 15 分", urgency: "high", track: "team", done: false,
           note: "阿里云 powerdown · 非 OOM" },
@@ -1549,6 +1630,84 @@
         { id: "e9", date: "2026-11-22", start: "15:00", end: "16:00", title: "小雪节点回顾",
           location: "—", remind: "无", urgency: "low", track: "local", done: false, note: "节气假事件" }
       ];
+      function loadCalEvents() {
+        try {
+          var raw = localStorage.getItem(CAL_KEY);
+          if (raw) {
+            var list = JSON.parse(raw);
+            if (Array.isArray(list)) return list;
+          }
+        } catch (e) {}
+        return CAL_DEFAULTS.map(function (e) { return Object.assign({}, e); });
+      }
+      function saveCalEvents() {
+        localStorage.setItem(CAL_KEY, JSON.stringify(calEvents));
+      }
+      var calEvents = loadCalEvents();
+      function commitHourWrite(hour, title, urgency) {
+        title = (title || "").trim();
+        if (!title) {
+          renderDayAxis();
+          return;
+        }
+        var h = pad2(+hour);
+        calEvents.push({
+          id: "e_" + Math.random().toString(36).slice(2, 8),
+          date: calSelected,
+          start: h + ":00",
+          end: h + ":30",
+          title: title,
+          urgency: urgency || "normal",
+          track: calTrack === "team" ? "team" : "local",
+          done: false
+        });
+        saveCalEvents();
+        renderCalendar();
+      }
+      function openHourWrite(hour, slot) {
+        if (!slot) return;
+        var urgency = "normal";
+        var levels = [
+          ["critical", "紧急·重要"],
+          ["high", "紧急·次要"],
+          ["normal", "普通"],
+          ["low", "低优"]
+        ];
+        slot.innerHTML = '<input class="cal-write" maxlength="80" placeholder="写入" />' +
+          '<div class="cal-write-urg">' +
+          levels.map(function (pair) {
+            return '<button type="button" class="sm' + (pair[0] === "normal" ? " on" : "") +
+              '" data-urg="' + pair[0] + '">' + pair[1] + "</button>";
+          }).join("") +
+          "</div>";
+        var input = slot.querySelector("input");
+        var settled = false;
+        function mark() {
+          slot.querySelectorAll("[data-urg]").forEach(function (b) {
+            b.classList.toggle("on", b.getAttribute("data-urg") === urgency);
+          });
+        }
+        slot.querySelectorAll("[data-urg]").forEach(function (b) {
+          b.addEventListener("mousedown", function (ev) { ev.preventDefault(); });
+          b.addEventListener("click", function (ev) {
+            ev.stopPropagation();
+            urgency = b.getAttribute("data-urg");
+            mark();
+            input.focus();
+          });
+        });
+        function finish() {
+          if (settled) return;
+          settled = true;
+          commitHourWrite(hour, input.value, urgency);
+        }
+        input.addEventListener("keydown", function (ev) {
+          if (ev.key === "Enter") finish();
+          else if (ev.key === "Escape") { settled = true; renderDayAxis(); }
+        });
+        input.addEventListener("blur", finish);
+        input.focus();
+      }
 
       function pad2(n) { return n < 10 ? "0" + n : String(n); }
       function ymd(y, m0, d) { return y + "-" + pad2(m0 + 1) + "-" + pad2(d); }
@@ -1698,7 +1857,7 @@
           parts.push('<div class="cal-hour-label">' + pad2(h) + ":00</div>");
           parts.push('<div class="cal-hour-slot">');
           if (!slotEvs.length) {
-            parts.push('<div class="cal-empty-slot">—</div>');
+            parts.push('<button type="button" class="cal-empty-slot" data-cal-write="' + h + '">写入</button>');
           } else {
             slotEvs.forEach(function (e) {
               var urg = e.urgency || "normal";
@@ -1714,7 +1873,8 @@
               parts.push("</div></div>");
               parts.push('<div class="cal-evt-meta">');
               parts.push('<span class="cal-tag ' + e.track + '">' + (e.track === "team" ? "团队" : "本地") + "</span>");
-              parts.push('<span class="cal-tag urg-' + urg + '">' + (URGENCY_LABEL[urg] || urg) + "</span>");
+              parts.push('<button type="button" class="cal-tag urg-' + urg + '" data-cal-act="urg" data-eid="' + e.id + '">' +
+                (URGENCY_LABEL[urg] || urg) + "</button>");
               if (e.location) parts.push("<span>📍 " + e.location + "</span>");
               if (e.remind) parts.push("<span>🔔 " + e.remind + "</span>");
               if (e.note) parts.push("<span>" + e.note + "</span>");
@@ -1733,7 +1893,7 @@
       }
 
       function showTab(name) {
-        var tabs = ["overview","members","usage","announce","calendar","session","gates"];
+        var tabs = ["overview","members","usage","announce","calendar"];
         tabs.forEach(function (t) {
           var el = $("tab-" + t);
           if (el) el.classList.toggle("hidden", t !== name);
@@ -1789,7 +1949,6 @@
         shell.classList.add("app");
         stage.classList.add("app-mode");
         $("who-name").textContent = session.displayName || session.user;
-        $("session-view").textContent = JSON.stringify(session, null, 2);
         var pill = $("role-pill");
         pill.textContent = session.role || "none";
         pill.className = "pill " + (session.role === "admin" ? "admin" : session.role === "member" ? "member" : "none");
@@ -1819,7 +1978,37 @@
         var user = ($("user").value || "").trim();
         var pass = $("pass").value || "";
         $("login-err").textContent = "";
+        if (remote) {
+          var btn = $("btn-login");
+          if (btn) btn.disabled = true;
+          fetch(API + "/login", {
+            method: "POST",
+            credentials: "same-origin",
+            headers: { "content-type": "application/json" },
+            body: JSON.stringify({ user: user, password: pass }),
+          }).then(function (r) {
+            return r.json().then(function (body) { return { ok: r.ok, body: body }; });
+          }).then(function (res) {
+            if (btn) btn.disabled = false;
+            if (!res.ok || !res.body.session) {
+              $("login-err").textContent = "用户未知或密码错误";
+              sessionCache = null;
+              render();
+              return;
+            }
+            sessionCache = res.body.session;
+            $("pass").value = "";
+            return hydrateState().then(function () { render(); watchBoot(); });
+          }).catch(function () {
+            if (btn) btn.disabled = false;
+            $("login-err").textContent = "门户暂时连不上";
+          });
+          return;
+        }
         var acct = USERS[user];
+        if (!acct && pass === "member" && loadMembers().some(function (m) { return m.id === user && m.role === "member"; })) {
+          acct = { password: "member", role: "member", displayName: user };
+        }
         if (!acct || acct.password !== pass) {
           $("login-err").textContent = "用户未知或密码错误";
           writeSession(null);
@@ -1839,6 +2028,16 @@
       }
 
       function logout() {
+        if (remote) {
+          fetch(API + "/logout", { method: "POST", credentials: "same-origin" })
+            .catch(function () {})
+            .then(function () {
+              sessionCache = null;
+              $("login-err").textContent = "";
+              render();
+            });
+          return;
+        }
         writeSession(null);
         $("login-err").textContent = "";
         render();
@@ -1874,46 +2073,6 @@
 
       $("btn-login").addEventListener("click", login);
       $("btn-logout").addEventListener("click", logout);
-      $("btn-admin-zone").addEventListener("click", function () { tryAdmin("admin-status"); });
-      $("btn-member-zone-2").addEventListener("click", function () { tryMember("member-status"); });
-      $("btn-member-zone").addEventListener("click", function () { tryMember("member-status-home"); });
-      $("btn-admin-zone-member").addEventListener("click", function () { tryAdmin("admin-status-member"); });
-      $("btn-mock-budget").addEventListener("click", function () {
-        var list = loadMembers();
-        var hit = list.find(function (m) { return m.id === "test001"; });
-        if (hit) {
-          var n = parseInt(String(hit.budget).replace(/%/g, ""), 10);
-          if (isNaN(n)) n = 45;
-          n = Math.min(100, n + 10);
-          hit.budget = n + "%";
-          saveMembers(list);
-          renderMembers();
-          renderOverviewFromMembers();
-          $("admin-only-status").innerHTML = '<span class="ok">mock：test001 预算 → ' + hit.budget + '</span>';
-        } else {
-          $("admin-only-status").innerHTML = '<span class="no">test001 不在列表（可重置成员）</span>';
-        }
-      });
-      $("btn-mock-disable").addEventListener("click", function () {
-        var list = loadMembers();
-        var hit = list.find(function (m) { return m.id === "test001"; });
-        if (hit) {
-          hit.seat = "off";
-          hit.port = null;
-          saveMembers(list);
-          renderMembers();
-          renderOverviewFromMembers();
-          $("admin-only-status").innerHTML = '<span class="ok">mock：已停用 test001 座位</span>';
-        } else {
-          $("admin-only-status").innerHTML = '<span class="no">test001 不在列表（可重置成员）</span>';
-        }
-      });
-      $("btn-fill-admin").addEventListener("click", function () {
-        $("user").value = "admin"; $("pass").value = "admin";
-      });
-      $("btn-fill-member").addEventListener("click", function () {
-        $("user").value = "member"; $("pass").value = "member";
-      });
       $("pass").addEventListener("keydown", function (e) { if (e.key === "Enter") login(); });
       $("user").addEventListener("keydown", function (e) { if (e.key === "Enter") login(); });
 
@@ -1937,9 +2096,21 @@
         Object.keys(bootTimers).forEach(function (k) { clearTimeout(bootTimers[k]); });
         bootTimers = {};
         nextPort = 3306;
+        if (remote) {
+          fetch(API + "/reset", { method: "POST", credentials: "same-origin" })
+            .then(function () { return hydrateState(); })
+            .then(function () {
+              renderMembers();
+              watchBoot();
+              setMemberNote("已重置，并重新拉取 admin001");
+            })
+            .catch(function () { setMemberNote("重置失败"); });
+          return;
+        }
         localStorage.removeItem(MEMBERS_KEY);
+        pullAdmin001();
         renderMembers();
-        setMemberNote("已重置为默认 mock 列表");
+        setMemberNote("已重置，并重新拉取 admin001");
       });
       $("members-tbody").addEventListener("click", function (e) {
         var btn = e.target.closest("button[data-act]");
@@ -2024,6 +2195,11 @@
         renderDayAxis();
       });
       $("cal-day").addEventListener("click", function (e) {
+        var write = e.target.closest("[data-cal-write]");
+        if (write) {
+          openHourWrite(write.getAttribute("data-cal-write"), write.closest(".cal-hour-slot"));
+          return;
+        }
         var btn = e.target.closest("button[data-cal-act]");
         if (!btn) return;
         var id = btn.getAttribute("data-eid");
@@ -2032,9 +2208,17 @@
           calEvents.forEach(function (ev) {
             if (ev.id === id) ev.done = !ev.done;
           });
+        } else if (act === "urg") {
+          var order = ["normal", "high", "critical", "low"];
+          calEvents.forEach(function (ev) {
+            if (ev.id !== id) return;
+            var i = order.indexOf(ev.urgency || "normal");
+            ev.urgency = order[(i + 1) % order.length];
+          });
         } else if (act === "remove") {
           calEvents = calEvents.filter(function (ev) { return ev.id !== id; });
         }
+        saveCalEvents();
         renderCalendar();
       });
 
@@ -2063,7 +2247,26 @@
         b.addEventListener("click", showWorkbench);
       });
 
-      render();
+      if (remote) {
+        var foot = $("login-foot");
+        if (foot) foot.textContent = "anywork-portal-auth · desk_session";
+        var sub = document.querySelector("#app-card .sub");
+        if (sub) sub.textContent = "进入工作台将打开 DSH";
+        fetch(API + "/session", { credentials: "same-origin", cache: "no-store" })
+          .then(function (r) { return r.json(); })
+          .then(function (body) {
+            sessionCache = body.session || null;
+            if (!sessionCache) { render(); return; }
+            return hydrateState().then(function () { render(); watchBoot(); });
+          })
+          .catch(function () {
+            $("login-err").textContent = "门户暂时连不上";
+            render();
+          });
+      } else {
+        pullAdmin001();
+        render();
+      }
     })();
   </script>
 </body>

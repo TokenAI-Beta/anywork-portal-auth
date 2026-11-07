@@ -1,6 +1,6 @@
-# anywork-portal-auth@0.2.0：门户登录 / desk_session / 角色闸 / 真 client 面板。
+# anywork-portal-auth：门户登录 / desk_session / 角色闸。
 # 槽位 id portal-auth，与资料库 ziliaoku / desk-hub 分开。
-# 安装示例（以后 · 本刀不执行本机 Docker 装卸）：
+# 安装后重启。不要装进现网 DSH，不要热补丁 desk-panel。
 #   dsh plugin --profile web add ./anywork-portal-auth-0.2.0.tgz
 # `--profile` 写在子命令前面。
 - insert:
