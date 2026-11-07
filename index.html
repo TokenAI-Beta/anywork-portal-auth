@@ -861,7 +861,7 @@
       };
 
       var remote = window.__ANYWORK_PORTAL_REMOTE__ === true;
-      var PORTAL_VERSION = window.__ANYWORK_PORTAL_VERSION__ || "0.2.19";
+      var PORTAL_VERSION = window.__ANYWORK_PORTAL_VERSION__ || "0.2.20";
       var GITHUB_URL = window.__ANYWORK_PORTAL_GITHUB__ || "https://github.com/TokenAI-Beta/anywork-portal-auth";
       var pendingUpdate = "";
       var API = "/plugins/anywork-portal-auth";
@@ -2202,7 +2202,7 @@
           return r.json().then(function (body) { return { ok: r.ok, body: body }; });
         }).then(function (res) {
           if (!res.ok) {
-            if (result) result.textContent = "升级没有完成";
+            if (result) result.textContent = (res.body && res.body.message) || "升级没有完成";
             if (choice) choice.classList.remove("hidden");
             return;
           }
