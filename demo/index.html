@@ -375,7 +375,12 @@
       background: var(--text); color: var(--bg); font-weight: 600;
     }
     .cal-picker-cell.muted { color: var(--faint); }
-    .cal-monthbar .cal-nav { display: flex; gap: 6px; }
+    .cal-monthbar .cal-nav { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+    .cal-tz {
+      background: var(--bg-soft); color: var(--text);
+      border: 1px solid var(--border-strong); border-radius: 8px;
+      font: inherit; font-size: 0.72rem; padding: 4px 8px; max-width: 168px;
+    }
     .cal-monthbar button.sm {
       background: var(--bg-soft); border-color: var(--border-strong); color: var(--text);
     }
@@ -584,6 +589,7 @@
             <button type="button" data-tab="usage" id="nav-usage">用量</button>
             <button type="button" data-tab="announce" id="nav-announce">公告</button>
             <button type="button" data-tab="calendar" id="nav-calendar">日历</button>
+            <button type="button" data-tab="api" id="nav-api">API接口</button>
             <div class="nav-hint" id="nav-hint"></div>
           </nav>
           <main class="main">
@@ -646,6 +652,21 @@
                     <button class="sm" type="button" id="btn-admin-zone-member">尝试进入</button>
                     <div class="status" id="admin-status-member"></div>
                   </div>
+                </div>
+              </div>
+              <div class="panel" id="update-panel">
+                <h3>更新</h3>
+                <p class="lede" id="update-current">当前版本</p>
+                <p style="margin:8px 0 0;font-size:0.84rem">
+                  <a id="update-github" href="https://github.com/TokenAI-Beta/anywork-portal-auth" target="_blank" rel="noopener" style="color:var(--text)">GitHub</a>
+                </p>
+                <div class="row-actions" style="margin-top:12px">
+                  <button type="button" class="sm" id="btn-check-update">检查更新</button>
+                </div>
+                <div id="update-result" style="margin-top:10px;font-size:0.84rem;color:var(--muted)"></div>
+                <div class="row-actions hidden" id="update-choice" style="margin-top:10px">
+                  <button type="button" class="sm primary" id="btn-upgrade">升级</button>
+                  <button type="button" class="sm" id="btn-skip-update">不升级</button>
                 </div>
               </div>
             </div>
@@ -745,6 +766,7 @@
                 <div class="cal-monthbar">
                   <button type="button" class="cal-month-title" id="cal-month-title" title="点选月份 / 年份">2026年11月</button>
                   <div class="cal-nav">
+                    <select id="cal-tz" class="cal-tz" title="时区，可不选"></select>
                     <button type="button" class="sm" id="btn-cal-prev" title="上月">︿</button>
                     <button type="button" class="sm" id="btn-cal-today">今天</button>
                     <button type="button" class="sm" id="btn-cal-next" title="下月">﹀</button>
@@ -774,6 +796,11 @@
                 </div>
               </div>
               <div class="cal-note">点一天，再点下面空着的小时，就能写入这件事。</div>
+            </div>
+
+            <div id="tab-api" class="hidden">
+              <h2>API接口</h2>
+              <p class="lede">coming soon</p>
             </div>
 
             <div id="workbench-view" class="hidden">
@@ -834,6 +861,9 @@
       };
 
       var remote = window.__ANYWORK_PORTAL_REMOTE__ === true;
+      var PORTAL_VERSION = window.__ANYWORK_PORTAL_VERSION__ || "0.2.19";
+      var GITHUB_URL = window.__ANYWORK_PORTAL_GITHUB__ || "https://github.com/TokenAI-Beta/anywork-portal-auth";
+      var pendingUpdate = "";
       var API = "/plugins/anywork-portal-auth";
       var sessionCache = null;
       var membersCache = null;
@@ -1360,8 +1390,70 @@
       }
 
 
-      var calMonth = new Date(2026, 10, 1); // month cursor
-      var calSelected = "2026-11-05";
+      var CAL_ZONES = [
+        { id: "", label: "跟随本机" },
+        { id: "Asia/Shanghai", label: "中国" },
+        { id: "Asia/Hong_Kong", label: "香港" },
+        { id: "Asia/Tokyo", label: "东京" },
+        { id: "Asia/Singapore", label: "新加坡" },
+        { id: "Asia/Dubai", label: "迪拜" },
+        { id: "Europe/London", label: "伦敦" },
+        { id: "Europe/Paris", label: "巴黎" },
+        { id: "America/New_York", label: "纽约" },
+        { id: "America/Los_Angeles", label: "洛杉矶" },
+        { id: "Pacific/Auckland", label: "奥克兰" },
+        { id: "UTC", label: "UTC" }
+      ];
+      var TZ_KEY = "anywork_portal_auth_calendar_tz";
+      function loadCalTz() {
+        try {
+          var saved = localStorage.getItem(TZ_KEY) || "";
+          if (!saved) return "";
+          Intl.DateTimeFormat("en-US", { timeZone: saved });
+          return saved;
+        } catch (e) { return ""; }
+      }
+      function tzOffsetMinutes(timeZone, date) {
+        if (!timeZone) return -date.getTimezoneOffset();
+        var fmt = new Intl.DateTimeFormat("en-US", {
+          timeZone: timeZone, hourCycle: "h23",
+          year: "numeric", month: "2-digit", day: "2-digit",
+          hour: "2-digit", minute: "2-digit", second: "2-digit"
+        });
+        var map = {};
+        fmt.formatToParts(date).forEach(function (p) { map[p.type] = p.value; });
+        var hour = +map.hour;
+        var day = +map.day;
+        if (hour === 24) { hour = 0; day += 1; }
+        var asUTC = Date.UTC(+map.year, +map.month - 1, day, hour, +map.minute, +map.second);
+        return Math.round((asUTC - date.getTime()) / 60000);
+      }
+      function tzOffsetLabel(timeZone) {
+        var mins = tzOffsetMinutes(timeZone, new Date());
+        var sign = mins >= 0 ? "+" : "-";
+        var abs = Math.abs(mins);
+        var text = "UTC" + sign + pad2(Math.floor(abs / 60));
+        if (abs % 60) text += ":" + pad2(abs % 60);
+        return text;
+      }
+      function zoneLabel(id) {
+        for (var i = 0; i < CAL_ZONES.length; i++) {
+          if (CAL_ZONES[i].id === id) return id ? CAL_ZONES[i].label : "本机";
+        }
+        return id || "本机";
+      }
+      function todayYmd() {
+        if (!calTz) return ymdFromDate(new Date());
+        var fmt = new Intl.DateTimeFormat("en-CA", {
+          timeZone: calTz, year: "numeric", month: "2-digit", day: "2-digit"
+        });
+        return fmt.format(new Date());
+      }
+      var calTz = loadCalTz();
+      var calToday = todayYmd();
+      var calTodayParts = calToday.split("-");
+      var calMonth = new Date(+calTodayParts[0], +calTodayParts[1] - 1, 1);
+      var calSelected = calToday;
       var calTrack = "all";
       var calAxisOpen = true;
       var calViewMode = "days"; // days | months | years
@@ -1423,6 +1515,7 @@
           title: title,
           urgency: urgency || "normal",
           track: calTrack === "team" ? "team" : "local",
+          tz: calTz || "",
           done: false
         });
         saveCalEvents();
@@ -1507,7 +1600,8 @@
         }
         var axis = $("cal-axis-heading");
         if (axis) {
-          axis.textContent = (dt.getMonth() + 1) + "月" + dt.getDate() + "日 · 日视图 07:00–22:00";
+          axis.textContent = (dt.getMonth() + 1) + "月" + dt.getDate() + "日 · 日视图 07:00–22:00 · " +
+            zoneLabel(calTz) + " " + tzOffsetLabel(calTz);
         }
       }
 
@@ -1561,7 +1655,7 @@
         var startPad = (first.getDay() + 6) % 7;
         var daysInMonth = new Date(y, m0 + 1, 0).getDate();
         var prevDays = new Date(y, m0, 0).getDate();
-        var todayStr = "2026-11-05";
+        var todayStr = todayYmd();
         var parts = [];
         WEEKDAYS_MON.forEach(function (d) {
           parts.push('<div class="cal-dow">' + d + "</div>");
@@ -1642,6 +1736,7 @@
               if (e.location) parts.push("<span>📍 " + e.location + "</span>");
               if (e.remind) parts.push("<span>🔔 " + e.remind + "</span>");
               if (e.note) parts.push("<span>" + e.note + "</span>");
+              if (e.tz && e.tz !== (calTz || "")) parts.push("<span>" + zoneLabel(e.tz) + "</span>");
               parts.push("</div></div>");
             });
           }
@@ -1657,7 +1752,7 @@
       }
 
       function showTab(name) {
-        var tabs = ["overview","members","usage","announce","calendar"];
+        var tabs = ["overview","members","usage","announce","calendar","api"];
         tabs.forEach(function (t) {
           var el = $("tab-" + t);
           if (el) el.classList.toggle("hidden", t !== name);
@@ -1905,9 +2000,25 @@
         }
         renderCalendar();
       });
+      function fillTzSelect() {
+        var sel = $("cal-tz");
+        if (!sel) return;
+        sel.innerHTML = CAL_ZONES.map(function (z) {
+          return '<option value="' + z.id + '">' + z.label + " " + tzOffsetLabel(z.id) + "</option>";
+        }).join("");
+        sel.value = calTz;
+      }
+      fillTzSelect();
+      if ($("cal-tz")) $("cal-tz").addEventListener("change", function () {
+        calTz = $("cal-tz").value || "";
+        try { localStorage.setItem(TZ_KEY, calTz); } catch (e) {}
+        renderCalendar();
+      });
       $("btn-cal-today").addEventListener("click", function () {
-        calMonth = new Date(2026, 10, 1);
-        calSelected = "2026-11-05";
+        var t = todayYmd();
+        var p = t.split("-");
+        calMonth = new Date(+p[0], +p[1] - 1, 1);
+        calSelected = t;
         calViewMode = "days";
         calAxisOpen = true;
         renderCalendar();
@@ -2002,6 +2113,113 @@
       });
       $("btn-wb-send").addEventListener("click", sendWbMsg);
       $("wb-input").addEventListener("keydown", function (e) { if (e.key === "Enter") sendWbMsg(); });
+
+      function compareVersions(left, right) {
+        function parts(value) {
+          return String(value || "").replace(/^v/, "").split(".").map(function (part) { return parseInt(part, 10) || 0; });
+        }
+        var a = parts(left);
+        var b = parts(right);
+        var n = Math.max(a.length, b.length);
+        for (var i = 0; i < n; i++) {
+          var diff = (a[i] || 0) - (b[i] || 0);
+          if (diff) return diff;
+        }
+        return 0;
+      }
+      function showUpdate(info) {
+        var result = $("update-result");
+        var choice = $("update-choice");
+        pendingUpdate = "";
+        if (!result || !choice) return;
+        choice.classList.add("hidden");
+        if (!info || info.error) {
+          result.textContent = "连不上 GitHub";
+          return;
+        }
+        if (info.current) PORTAL_VERSION = info.current;
+        var current = $("update-current");
+        if (current) current.textContent = "当前版本 " + PORTAL_VERSION;
+        if (!info.update) {
+          result.textContent = "已是最新，当前 " + PORTAL_VERSION;
+          return;
+        }
+        pendingUpdate = info.latest;
+        result.textContent = "发现新版本 " + info.latest + "，当前 " + PORTAL_VERSION;
+        choice.classList.remove("hidden");
+      }
+      function checkUpdate() {
+        var btn = $("btn-check-update");
+        var result = $("update-result");
+        if (btn) btn.disabled = true;
+        if (result) result.textContent = "正在检查…";
+        var done = function (info) {
+          if (btn) btn.disabled = false;
+          showUpdate(info);
+        };
+        if (remote) {
+          fetch(API + "/update", { credentials: "same-origin", cache: "no-store" })
+            .then(function (r) { return r.json().then(function (body) { return r.ok ? body : { error: true }; }); })
+            .then(done)
+            .catch(function () { done({ error: true }); });
+          return;
+        }
+        fetch("https://raw.githubusercontent.com/TokenAI-Beta/anywork-portal-auth/main/package.json")
+          .then(function (r) { return r.json(); })
+          .then(function (pkg) {
+            var latest = String(pkg.version || "");
+            done({ current: PORTAL_VERSION, latest: latest, update: compareVersions(latest, PORTAL_VERSION) > 0 });
+          })
+          .catch(function () { done({ error: true }); });
+      }
+      function skipUpdate() {
+        pendingUpdate = "";
+        var choice = $("update-choice");
+        var result = $("update-result");
+        if (choice) choice.classList.add("hidden");
+        if (result) result.textContent = "已保留当前版本 " + PORTAL_VERSION;
+      }
+      function upgrade() {
+        if (!pendingUpdate) return;
+        var choice = $("update-choice");
+        var result = $("update-result");
+        if (!remote) {
+          if (result) result.textContent = "本地演示不能安装更新";
+          return;
+        }
+        if (!sessionCache || sessionCache.role !== "admin") {
+          if (result) result.textContent = "需要管理员才能升级";
+          return;
+        }
+        if (choice) choice.classList.add("hidden");
+        if (result) result.textContent = "正在安装 " + pendingUpdate + "…";
+        fetch(API + "/update", {
+          method: "POST",
+          credentials: "same-origin",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ version: pendingUpdate }),
+        }).then(function (r) {
+          return r.json().then(function (body) { return { ok: r.ok, body: body }; });
+        }).then(function (res) {
+          if (!res.ok) {
+            if (result) result.textContent = "升级没有完成";
+            if (choice) choice.classList.remove("hidden");
+            return;
+          }
+          pendingUpdate = "";
+          if (result) result.textContent = res.body.message || "已安装。重启实例后才会换成新版本。";
+        }).catch(function () {
+          if (result) result.textContent = "升级没有完成";
+          if (choice) choice.classList.remove("hidden");
+        });
+      }
+      var updateCurrent = $("update-current");
+      if (updateCurrent) updateCurrent.textContent = "当前版本 " + PORTAL_VERSION;
+      var updateGithub = $("update-github");
+      if (updateGithub) updateGithub.href = GITHUB_URL;
+      $("btn-check-update").addEventListener("click", checkUpdate);
+      $("btn-upgrade").addEventListener("click", upgrade);
+      $("btn-skip-update").addEventListener("click", skipUpdate);
 
       $("btn-enter-workbench").addEventListener("click", showWorkbench);
       $("btn-back-portal").addEventListener("click", showPortal);
