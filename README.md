@@ -20,8 +20,8 @@ demo/index.html
 
 | 用户 | 密码 | 角色 | 结果 |
 |------|------|------|------|
-| `admin001` | `qwer123` | admin | 重启后由宿主拉取；可进 Admin-only + Member 区 |
-| `member` | `member` | member | 仅 Member 区；Admin-only **拒绝** |
+| `admin001` | `qwer123` | admin | 安装并重启后只拉起这个管理员 |
+| 之后注册的成员 | `member` | member | 仅 Member 区；Admin-only **拒绝** |
 | 错密 / 未知用户 | — | — | 登录拒绝 |
 
 本地双击演示时，会话在 `localStorage`。装进 DSH 后，登录写入 cookie `desk_session`，成员和公告写在 `$DSH_HOME/anywork-portal-auth/state.json`（没有 `DSH_HOME` 时用 `~/.dsh`）。
@@ -32,7 +32,7 @@ demo/index.html
 
 ```sh
 npm pack
-dsh plugin --profile web add ./anywork-portal-auth-0.2.25.tgz
+dsh plugin --profile web add ./anywork-portal-auth-0.2.26.tgz
 ```
 
 `--profile` 写在子命令前面。装上或卸下之后重启实例。重启后门户出现在 `/plugins/anywork-portal-auth/`，并拉起 `admin001` 的实例（mock 端口 `3301`）。
@@ -48,7 +48,7 @@ dsh plugin --profile web remove anywork-portal-auth
 ## Demo 能力清单
 
 - 登录 / 登出 / `desk_session` / 角色闸
-- 门户后页：总览 / 成员 / 用量 / 公告（admin 有内容；member 闸住）
+- 门户后页：总览 / 成员 / 用量 / 公告。安装后只有 `admin001`，公告为空；member 闸住成员管理
 - 「进入工作台」mock（不跳座位端口）+ 返回门户
 - 日历：月历（农历/节气）· 点日下方 07–22 日轴写入 · 紧急色/完成删/本地|团队 · 点月标题跳选年月 · 时区可选（默认跟随本机）。不带示例事件
 - 用量：空表，不带示例 token / 费用

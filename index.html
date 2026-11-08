@@ -857,11 +857,10 @@
       var INITIAL_PASSWORD = "qwer123";
       var USERS = {
         admin001: { password: INITIAL_PASSWORD, role: "admin", displayName: "admin001" },
-        member: { password: "member", role: "member", displayName: "Member Demo" },
       };
 
       var remote = window.__ANYWORK_PORTAL_REMOTE__ === true;
-      var PORTAL_VERSION = window.__ANYWORK_PORTAL_VERSION__ || "0.2.25";
+      var PORTAL_VERSION = window.__ANYWORK_PORTAL_VERSION__ || "0.2.26";
       var GITHUB_URL = window.__ANYWORK_PORTAL_GITHUB__ || "https://github.com/TokenAI-Beta/anywork-portal-auth";
       var pendingUpdate = "";
       var API = "/plugins/anywork-portal-auth";
@@ -921,14 +920,10 @@
       function $(id) { return document.getElementById(id); }
 
       var MEMBERS_KEY = "anywork_portal_auth_demo_members";
+      var DEMO_CLEARED_KEY = "anywork_portal_auth_demo_cleared";
+      var DEMO_MEMBER_IDS = { cth: 1, test001: 1, yk: 1, xc: 1 };
       var ADMIN_ID = "admin001";
       var ADMIN_PORT = 3301;
-      var DEFAULT_MEMBERS = [
-        { id: "cth", role: "member", budget: "80%", seat: "up", port: 3303 },
-        { id: "test001", role: "member", budget: "45%", seat: "idle", port: 3302 },
-        { id: "yk", role: "member", budget: "22%", seat: "up", port: 3304 },
-        { id: "xc", role: "member", budget: "10%", seat: "off", port: null },
-      ];
       var nextPort = 3306;
       var bootTimers = {};
 
@@ -950,7 +945,7 @@
             return list;
           }
         } catch (e) {}
-        return DEFAULT_MEMBERS.map(function (m) { return Object.assign({}, m); });
+        return [];
       }
       function saveMembers(list) {
         if (remote) {
@@ -1163,18 +1158,33 @@
 
 
       var ANN_KEY = "anywork_portal_auth_demo_announcements";
-      var DEFAULT_ANNS = [
-        { id: "a1", title: "周五演示窗口", body: "港机勿擅自改；本机 Docker-only。", author: "admin001", at: "2026-11-05", pinned: true },
-        { id: "a2", title: "资料库共享说明", body: "drive/kb 为门户全员共享卷，非按座位隔离。", author: "admin001", at: "2026-11-02", pinned: false },
-        { id: "a3", title: "xlsx 预览已知问题", body: "documentpreview 自 10-29 起禁用 Iterator 相关崩溃。", author: "admin001", at: "2026-11-02", pinned: false }
-      ];
+      function clearStoredDemo() {
+        if (remote) return;
+        try {
+          if (localStorage.getItem(DEMO_CLEARED_KEY)) return;
+          var members = JSON.parse(localStorage.getItem(MEMBERS_KEY) || "null");
+          if (Array.isArray(members)) {
+            localStorage.setItem(MEMBERS_KEY, JSON.stringify(members.filter(function (m) {
+              return m && !DEMO_MEMBER_IDS[m.id];
+            })));
+          }
+          var anns = JSON.parse(localStorage.getItem(ANN_KEY) || "null");
+          if (Array.isArray(anns)) {
+            localStorage.setItem(ANN_KEY, JSON.stringify(anns.filter(function (a) {
+              return a && a.id !== "a1" && a.id !== "a2" && a.id !== "a3";
+            })));
+          }
+          localStorage.setItem(DEMO_CLEARED_KEY, "1");
+        } catch (e) {}
+      }
+      clearStoredDemo();
       function loadAnns() {
         if (remote) return annsCache || [];
         try {
           var raw = localStorage.getItem(ANN_KEY);
           if (raw) return JSON.parse(raw);
         } catch (e) {}
-        return DEFAULT_ANNS.map(function (a) { return Object.assign({}, a); });
+        return [];
       }
       function saveAnns(list) {
         if (remote) {
