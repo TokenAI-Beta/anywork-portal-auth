@@ -594,6 +594,17 @@
           </nav>
           <main class="main">
             <div id="tab-overview">
+              <div class="panel" id="password-panel">
+                <h3>修改登录密码</h3>
+                <p class="lede">只能修改当前登录账号。新注册成员的初始密码是 member。</p>
+                <div class="members-toolbar">
+                  <input id="pw-current" type="password" autocomplete="current-password" placeholder="当前密码" />
+                  <input id="pw-next" type="password" autocomplete="new-password" placeholder="新密码" />
+                  <input id="pw-next2" type="password" autocomplete="new-password" placeholder="再输入一次" />
+                  <button type="button" class="sm primary" id="btn-change-password" style="flex:0">保存</button>
+                </div>
+                <div class="members-note" id="password-note"></div>
+              </div>
               <div id="overview-admin">
                 <h2>管理总览</h2>
                 <div class="stats" id="overview-stats">
@@ -860,7 +871,7 @@
       };
 
       var remote = window.__ANYWORK_PORTAL_REMOTE__ === true;
-      var PORTAL_VERSION = window.__ANYWORK_PORTAL_VERSION__ || "0.2.28";
+      var PORTAL_VERSION = window.__ANYWORK_PORTAL_VERSION__ || "0.2.29";
       var GITHUB_URL = window.__ANYWORK_PORTAL_GITHUB__ || "https://github.com/TokenAI-Beta/anywork-portal-auth";
       var pendingUpdate = "";
       var API = "/plugins/anywork-portal-auth";
@@ -920,6 +931,7 @@
       function $(id) { return document.getElementById(id); }
 
       var MEMBERS_KEY = "anywork_portal_auth_demo_members";
+      var PASS_KEY = "anywork_portal_auth_passwords";
       var DEMO_CLEARED_KEY = "anywork_portal_auth_demo_cleared";
       var DEMO_MEMBER_IDS = { cth: 1, test001: 1, yk: 1, xc: 1 };
       var ADMIN_ID = "admin001";
@@ -1953,8 +1965,12 @@
           return;
         }
         var acct = USERS[user];
-        if (!acct && pass === "member" && loadMembers().some(function (m) { return m.id === user && m.role === "member"; })) {
+        if (!acct && loadMembers().some(function (m) { return m.id === user && m.role === "member"; })) {
           acct = { password: "member", role: "member", displayName: user };
+        }
+        if (acct) {
+          var stored = readPasswords()[user];
+          if (stored) acct = { password: stored, role: acct.role, displayName: acct.displayName || user };
         }
         if (!acct || acct.password !== pass) {
           $("login-err").textContent = "用户未知或密码错误";
@@ -2019,6 +2035,69 @@
       }
 
       $("btn-login").addEventListener("click", login);
+      function readPasswords() {
+        try { return JSON.parse(localStorage.getItem(PASS_KEY) || "{}") || {}; }
+        catch (e) { return {}; }
+      }
+      function setPasswordNote(msg) {
+        var n = $("password-note");
+        if (n) n.textContent = msg;
+      }
+      function changePassword() {
+        var session = readSession();
+        if (!session || !session.user) { setPasswordNote("请先登录"); return; }
+        var current = ($("pw-current") && $("pw-current").value) || "";
+        var next = ($("pw-next") && $("pw-next").value) || "";
+        var again = ($("pw-next2") && $("pw-next2").value) || "";
+        if (!current || !next) { setPasswordNote("请填写当前密码和新密码"); return; }
+        if (next !== again) { setPasswordNote("两次新密码不一致"); return; }
+        if (next.length < 4 || next.length > 64 || /\s/.test(next)) {
+          setPasswordNote("新密码需要 4–64 位，且不能包含空格");
+          return;
+        }
+        if (remote) {
+          var btn = $("btn-change-password");
+          if (btn) btn.disabled = true;
+          fetch(API + "/password", {
+            method: "POST",
+            credentials: "same-origin",
+            headers: { "content-type": "application/json" },
+            body: JSON.stringify({ current: current, next: next }),
+          }).then(function (r) {
+            return r.json().then(function (body) { return { ok: r.ok, body: body }; });
+          }).then(function (res) {
+            if (btn) btn.disabled = false;
+            if (!res.ok) {
+              setPasswordNote((res.body && res.body.message) || "没有修改");
+              return;
+            }
+            $("pw-current").value = "";
+            $("pw-next").value = "";
+            $("pw-next2").value = "";
+            setPasswordNote("已修改。下次请用新密码登录");
+          }).catch(function () {
+            if (btn) btn.disabled = false;
+            setPasswordNote("门户暂时连不上");
+          });
+          return;
+        }
+        var user = session.user;
+        var acct = USERS[user];
+        if (!acct && loadMembers().some(function (m) { return m.id === user && m.role === "member"; })) {
+          acct = { password: "member" };
+        }
+        var stored = readPasswords()[user];
+        var actual = stored || (acct && acct.password) || "";
+        if (!acct || actual !== current) { setPasswordNote("当前密码不正确"); return; }
+        var map = readPasswords();
+        map[user] = next;
+        localStorage.setItem(PASS_KEY, JSON.stringify(map));
+        $("pw-current").value = "";
+        $("pw-next").value = "";
+        $("pw-next2").value = "";
+        setPasswordNote("已修改。下次请用新密码登录");
+      }
+      $("btn-change-password").addEventListener("click", changePassword);
       $("btn-logout").addEventListener("click", logout);
       $("pass").addEventListener("keydown", function (e) { if (e.key === "Enter") login(); });
       $("user").addEventListener("keydown", function (e) { if (e.key === "Enter") login(); });
