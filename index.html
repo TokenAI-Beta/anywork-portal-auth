@@ -598,7 +598,7 @@
                 <h2>管理总览</h2>
                 <div class="stats" id="overview-stats">
                   <div class="stat"><div class="k">座位</div><div class="v" id="ov-seat-total">5</div><div class="s" id="ov-seat-sub">4 在线 · 1 停用</div></div>
-                  <div class="stat"><div class="k">本月用量</div><div class="v">0</div><div class="s">token</div></div>
+                  <div class="stat"><div class="k">本月用量</div><div class="v" id="ov-usage-month">0</div><div class="s">token</div></div>
                   <div class="stat"><div class="k">座位健康</div><div class="v" id="ov-health-v">4/5</div><div class="s" id="ov-health-s">在线 · mock</div></div>
                   <div class="stat"><div class="k">公告</div><div class="v" id="ov-ann-v">3</div><div class="s" id="ov-ann-s">1 置顶</div></div>
                 </div>
@@ -624,8 +624,8 @@
                 <p class="lede">你是 member · 管理入口已闸住</p>
                 <div class="member-banner member">成员视图：可看个人用量与公告；成员管理需 admin。</div>
                 <div class="stats">
-                  <div class="stat"><div class="k">我的用量</div><div class="v">0</div><div class="s">token · 本月</div></div>
-                  <div class="stat"><div class="k">配额</div><div class="v">0%</div><div class="s">本月已用</div></div>
+                  <div class="stat"><div class="k">我的用量</div><div class="v" id="ov-member-month">0</div><div class="s">token · 本月</div></div>
+                  <div class="stat"><div class="k">今日</div><div class="v" id="ov-member-today">0</div><div class="s">token</div></div>
                 </div>
 
                 <div class="wb-enter-card">
@@ -695,42 +695,42 @@
 
             <div id="tab-usage" class="hidden">
               <h2>工作台用量</h2>
-              <p class="lede" id="usage-lede">暂无用量记录</p>
+              <p class="lede" id="usage-lede">按账号汇总座位会话中的 token</p>
               <div class="stats" id="usage-stats-admin">
-                <div class="stat"><div class="k">今日</div><div class="v">0</div><div class="s">token</div></div>
-                <div class="stat"><div class="k">本月</div><div class="v">0</div><div class="s">token</div></div>
-                <div class="stat"><div class="k">本月费用</div><div class="v">¥0</div><div class="s">估算</div></div>
-                <div class="stat"><div class="k">预算</div><div class="v">0%</div><div class="s">已用</div></div>
+                <div class="stat"><div class="k">今日</div><div class="v" id="usage-today">0</div><div class="s">token</div></div>
+                <div class="stat"><div class="k">本月</div><div class="v" id="usage-month">0</div><div class="s">token</div></div>
+                <div class="stat"><div class="k">本月调用</div><div class="v" id="usage-calls">0</div><div class="s">次</div></div>
+                <div class="stat"><div class="k">费用</div><div class="v">—</div><div class="s">见各家控制台</div></div>
               </div>
               <div class="stats hidden" id="usage-stats-member">
-                <div class="stat"><div class="k">今日</div><div class="v">0</div><div class="s">token</div></div>
-                <div class="stat"><div class="k">本月</div><div class="v">0</div><div class="s">token</div></div>
-                <div class="stat"><div class="k">本月费用</div><div class="v">¥0</div><div class="s">估算</div></div>
-                <div class="stat"><div class="k">配额</div><div class="v">0%</div><div class="s">已用</div></div>
+                <div class="stat"><div class="k">今日</div><div class="v" id="usage-today-member">0</div><div class="s">token</div></div>
+                <div class="stat"><div class="k">本月</div><div class="v" id="usage-month-member">0</div><div class="s">token</div></div>
+                <div class="stat"><div class="k">本月调用</div><div class="v" id="usage-calls-member">0</div><div class="s">次</div></div>
+                <div class="stat"><div class="k">费用</div><div class="v">—</div><div class="s">见各家控制台</div></div>
               </div>
               <div class="panel" id="usage-table-admin">
                 <h3>团队明细</h3>
-                <div class="announce-empty">暂无记录</div>
+                <div id="usage-team" class="announce-empty">暂无记录</div>
               </div>
               <div class="panel hidden" id="usage-table-member">
                 <h3>我的明细</h3>
-                <div class="announce-empty">暂无记录</div>
+                <div id="usage-mine" class="announce-empty">暂无记录</div>
               </div>
               <div class="panel" id="usage-hist-admin">
                 <h3>历史记录 · 按日汇总（团队）</h3>
-                <div class="announce-empty">暂无记录</div>
+                <div id="usage-days" class="announce-empty">暂无记录</div>
               </div>
               <div class="panel" id="usage-hist-admin-calls">
                 <h3>历史记录 · 按次（团队最近）</h3>
-                <div class="announce-empty">暂无记录</div>
+                <div id="usage-recent" class="announce-empty">暂无记录</div>
               </div>
               <div class="panel hidden" id="usage-hist-member">
                 <h3>历史记录 · 按日汇总（我的）</h3>
-                <div class="announce-empty">暂无记录</div>
+                <div id="usage-days-member" class="announce-empty">暂无记录</div>
               </div>
               <div class="panel hidden" id="usage-hist-member-calls">
                 <h3>历史记录 · 按次（我的最近）</h3>
-                <div class="announce-empty">暂无记录</div>
+                <div id="usage-recent-member" class="announce-empty">暂无记录</div>
               </div>
             </div>
 
@@ -860,7 +860,7 @@
       };
 
       var remote = window.__ANYWORK_PORTAL_REMOTE__ === true;
-      var PORTAL_VERSION = window.__ANYWORK_PORTAL_VERSION__ || "0.2.27";
+      var PORTAL_VERSION = window.__ANYWORK_PORTAL_VERSION__ || "0.2.28";
       var GITHUB_URL = window.__ANYWORK_PORTAL_GITHUB__ || "https://github.com/TokenAI-Beta/anywork-portal-auth";
       var pendingUpdate = "";
       var API = "/plugins/anywork-portal-auth";
@@ -1793,6 +1793,85 @@
           : "member：用量/日历/公告只读；成员管理需 admin";
       }
 
+      function esc(value) {
+        return String(value == null ? "" : value)
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;");
+      }
+      function fmt(n) {
+        return Number(n || 0).toLocaleString("zh-CN");
+      }
+      function usageTable(columns, rows, empty) {
+        if (!rows || !rows.length) return '<div class="announce-empty">' + empty + "</div>";
+        return "<table><thead><tr>" + columns.map(function (col) {
+          return "<th>" + esc(col.label) + "</th>";
+        }).join("") + "</tr></thead><tbody>" + rows.map(function (row) {
+          return "<tr>" + columns.map(function (col) {
+            return "<td>" + esc(col.value(row)) + "</td>";
+          }).join("") + "</tr>";
+        }).join("") + "</tbody></table>";
+      }
+      function paintUsage(report, isAdmin) {
+        var today = report && report.today || 0;
+        var month = report && report.month || 0;
+        var calls = report && report.callsMonth || 0;
+        var set = function (id, value) { var el = $(id); if (el) el.textContent = value; };
+        set("ov-usage-month", fmt(month));
+        set("ov-member-month", fmt(month));
+        set("ov-member-today", fmt(today));
+        set(isAdmin ? "usage-today" : "usage-today-member", fmt(today));
+        set(isAdmin ? "usage-month" : "usage-month-member", fmt(month));
+        set(isAdmin ? "usage-calls" : "usage-calls-member", fmt(calls));
+        var accountCols = [
+          { label: "用户", value: function (row) { return row.user; } },
+          { label: "今日 token", value: function (row) { return fmt(row.today); } },
+          { label: "本月 token", value: function (row) { return fmt(row.month); } },
+          { label: "本月调用", value: function (row) { return fmt(row.callsMonth); } }
+        ];
+        var dayCols = [
+          { label: "日期", value: function (row) { return row.day; } },
+          { label: "用户", value: function (row) { return row.user; } },
+          { label: "token", value: function (row) { return fmt(row.tokens); } },
+          { label: "调用", value: function (row) { return fmt(row.calls); } }
+        ];
+        var callCols = [
+          { label: "时间", value: function (row) { return (row.at || "").replace("T", " ").slice(0, 16); } },
+          { label: "用户", value: function (row) { return row.user; } },
+          { label: "模型", value: function (row) { return row.model || "—"; } },
+          { label: "token", value: function (row) { return fmt(row.tokens); } }
+        ];
+        var rows = report && report.rows || [];
+        var days = report && report.days || [];
+        var recent = report && report.calls || [];
+        var team = $("usage-team");
+        var mine = $("usage-mine");
+        if (team) team.innerHTML = usageTable(accountCols, rows, "暂无记录");
+        if (mine) mine.innerHTML = usageTable(accountCols, rows, "暂无记录");
+        var dayHost = $(isAdmin ? "usage-days" : "usage-days-member");
+        var callHost = $(isAdmin ? "usage-recent" : "usage-recent-member");
+        if (dayHost) dayHost.innerHTML = usageTable(dayCols, days, "暂无记录");
+        if (callHost) callHost.innerHTML = usageTable(callCols, recent, "暂无记录");
+        var lede = $("usage-lede");
+        if (lede) lede.textContent = "按账号汇总座位会话中的 token · 今日 / 本月（上海时区）· 不含金额";
+      }
+      function loadUsage() {
+        var session = readSession();
+        fetch(API + "/usage", { credentials: "same-origin", cache: "no-store" })
+          .then(function (r) { return r.ok ? r.json() : null; })
+          .then(function (report) {
+            if (!report) {
+              var lede = $("usage-lede");
+              if (lede) lede.textContent = "用量暂时读不到";
+              return;
+            }
+            paintUsage(report, session && session.role === "admin");
+          })
+          .catch(function () {
+            var lede = $("usage-lede");
+            if (lede) lede.textContent = "用量暂时读不到";
+          });
+      }
       function render() {
         var session = readSession();
         var loginCard = $("login-card");
@@ -1832,8 +1911,9 @@
         $("usage-hist-admin-calls").classList.toggle("hidden", !isAdmin);
         $("usage-hist-member").classList.toggle("hidden", isAdmin);
         $("usage-hist-member-calls").classList.toggle("hidden", isAdmin);
-        $("usage-lede").textContent = "暂无用量记录";
+        $("usage-lede").textContent = remote ? "正在汇总座位会话…" : "本地演示不读取会话用量";
         setAdminNav(isAdmin);
+        if (remote) loadUsage();
         renderMembers();
         renderAnnouncements();
         renderOverviewFromMembers();
