@@ -31,6 +31,18 @@
       color: var(--text);
       -webkit-font-smoothing: antialiased;
     }
+    .lang-switch { display: inline-flex; gap: 4px; }
+    .lang-switch button {
+      border: 1px solid var(--border);
+      background: transparent;
+      color: var(--muted);
+      border-radius: 8px;
+      padding: 4px 8px;
+      font: inherit;
+      font-size: 12px;
+      cursor: pointer;
+    }
+    .lang-switch button.on { color: var(--text); border-color: var(--border-strong); background: var(--bg-soft); }
     .stage {
       min-height: 100%;
       display: flex;
@@ -546,21 +558,25 @@
     <div id="shell" class="shell">
       <div id="login-brand" class="brand">
         <div class="mark">T AI</div>
-        <h1>成员登录</h1>
+        <h1 data-i18n="loginTitle">成员登录</h1>
         <p>TokenAI门户</p>
+        <div class="lang-switch" style="margin-top:12px">
+          <button type="button" data-set-lang="zh">中文</button>
+          <button type="button" data-set-lang="en">EN</button>
+        </div>
       </div>
 
       <section id="login-card" class="card">
         <div class="field">
-          <label for="user">用户名</label>
-          <input id="user" autocomplete="username" placeholder="用户名" />
+          <label for="user" data-i18n="username">用户名</label>
+          <input id="user" autocomplete="username" placeholder="用户名" data-i18n-placeholder="username" />
         </div>
         <div class="field">
-          <label for="pass">密码</label>
-          <input id="pass" type="password" autocomplete="current-password" placeholder="密码" />
+          <label for="pass" data-i18n="password">密码</label>
+          <input id="pass" type="password" autocomplete="current-password" placeholder="密码" data-i18n-placeholder="password" />
         </div>
         <div class="actions">
-          <button class="primary" id="btn-login" type="button">登录</button>
+          <button class="primary" id="btn-login" type="button" data-i18n="signIn">登录</button>
         </div>
         <div class="err" id="login-err"></div>
       </section>
@@ -571,216 +587,220 @@
             <div class="logo">T AI</div>
             <div>
               <div class="title">TokenAI门户</div>
-              <div class="sub">demo mock · 非现网</div>
+              <div class="sub" data-i18n="portalSub">demo mock · 非现网</div>
             </div>
           </div>
           <div class="who">
             <span id="who-name" style="font-size:0.875rem"></span>
             <span id="role-pill" class="pill"></span>
-            <button class="btn-enter-wb sm" id="btn-enter-workbench" type="button">进入工作台</button>
-            <button class="danger sm" id="btn-logout" type="button">登出</button>
+            <div class="lang-switch">
+              <button type="button" data-set-lang="zh">中文</button>
+              <button type="button" data-set-lang="en">EN</button>
+            </div>
+            <button class="btn-enter-wb sm" id="btn-enter-workbench" type="button" data-i18n="enterWb">进入工作台</button>
+            <button class="danger sm" id="btn-logout" type="button" data-i18n="signOut">登出</button>
           </div>
         </div>
         <div id="portal-view">
         <div class="layout">
           <nav class="nav" id="nav">
-            <button type="button" data-tab="overview" class="active">总览</button>
-            <button type="button" data-tab="members" id="nav-members">成员</button>
-            <button type="button" data-tab="usage" id="nav-usage">用量</button>
-            <button type="button" data-tab="announce" id="nav-announce">公告</button>
-            <button type="button" data-tab="calendar" id="nav-calendar">日历</button>
-            <button type="button" data-tab="api" id="nav-api">API接口</button>
+            <button type="button" data-tab="overview" class="active" data-i18n="navOverview">总览</button>
+            <button type="button" data-tab="members" id="nav-members" data-i18n="navMembers">成员</button>
+            <button type="button" data-tab="usage" id="nav-usage" data-i18n="navUsage">用量</button>
+            <button type="button" data-tab="announce" id="nav-announce" data-i18n="navAnnounce">公告</button>
+            <button type="button" data-tab="calendar" id="nav-calendar" data-i18n="navCalendar">日历</button>
+            <button type="button" data-tab="api" id="nav-api" data-i18n="navApi">API接口</button>
             <div class="nav-hint" id="nav-hint"></div>
           </nav>
           <main class="main">
             <div id="tab-overview">
               <div class="panel" id="password-panel">
-                <h3>修改登录密码</h3>
-                <p class="lede">只能修改当前登录账号。新注册成员的初始密码是 member。</p>
+                <h3 data-i18n="pwTitle">修改登录密码</h3>
+                <p class="lede" data-i18n="pwLede">只能修改当前登录账号。新注册成员的初始密码是 member。</p>
                 <div class="members-toolbar">
-                  <input id="pw-current" type="password" autocomplete="current-password" placeholder="当前密码" />
-                  <input id="pw-next" type="password" autocomplete="new-password" placeholder="新密码" />
-                  <input id="pw-next2" type="password" autocomplete="new-password" placeholder="再输入一次" />
-                  <button type="button" class="sm primary" id="btn-change-password" style="flex:0">保存</button>
+                  <input id="pw-current" type="password" autocomplete="current-password" placeholder="当前密码" data-i18n-placeholder="pwCurrent" />
+                  <input id="pw-next" type="password" autocomplete="new-password" placeholder="新密码" data-i18n-placeholder="pwNext" />
+                  <input id="pw-next2" type="password" autocomplete="new-password" placeholder="再输入一次" data-i18n-placeholder="pwAgain" />
+                  <button type="button" class="sm primary" id="btn-change-password" style="flex:0" data-i18n="save">保存</button>
                 </div>
                 <div class="members-note" id="password-note"></div>
               </div>
               <div id="overview-admin">
-                <h2>管理总览</h2>
+                <h2 data-i18n="adminOverview">管理总览</h2>
                 <div class="stats" id="overview-stats">
-                  <div class="stat"><div class="k">座位</div><div class="v" id="ov-seat-total">5</div><div class="s" id="ov-seat-sub">4 在线 · 1 停用</div></div>
-                  <div class="stat"><div class="k">本月用量</div><div class="v" id="ov-usage-month">0</div><div class="s">token</div></div>
-                  <div class="stat"><div class="k">座位健康</div><div class="v" id="ov-health-v">4/5</div><div class="s" id="ov-health-s">在线 · mock</div></div>
-                  <div class="stat"><div class="k">公告</div><div class="v" id="ov-ann-v">3</div><div class="s" id="ov-ann-s">1 置顶</div></div>
+                  <div class="stat"><div class="k" data-i18n="seats">座位</div><div class="v" id="ov-seat-total">5</div><div class="s" id="ov-seat-sub">4 在线 · 1 停用</div></div>
+                  <div class="stat"><div class="k" data-i18n="monthUsage">本月用量</div><div class="v" id="ov-usage-month">0</div><div class="s">token</div></div>
+                  <div class="stat"><div class="k" data-i18n="seatHealth">座位健康</div><div class="v" id="ov-health-v">4/5</div><div class="s" id="ov-health-s">在线 · mock</div></div>
+                  <div class="stat"><div class="k" data-i18n="navAnnounce">公告</div><div class="v" id="ov-ann-v">3</div><div class="s" id="ov-ann-s">1 置顶</div></div>
                 </div>
-                <div class="ov-stat-note" id="ov-stat-note">座位 / 公告数字跟成员页与公告板联动（mock）</div>
+                <div class="ov-stat-note" id="ov-stat-note" data-i18n="ovNote">座位 / 公告数字跟成员页与公告板联动（mock）</div>
 
                 <div class="wb-enter-card">
                   <div class="wb-copy">
-                    <div class="wb-k">进入工作台</div>
-                    <div class="wb-s">打开座位桌面占位页（本 demo 内 mock，不跳真实端口）</div>
+                    <div class="wb-k" data-i18n="enterWb">进入工作台</div>
+                    <div class="wb-s" data-i18n="enterWbSub">打开座位桌面占位页（本 demo 内 mock，不跳真实端口）</div>
                   </div>
-                  <button class="btn-enter-wb" type="button" data-enter-wb>进入工作台</button>
+                  <button class="btn-enter-wb" type="button" data-enter-wb data-i18n="enterWb">进入工作台</button>
                 </div>
                 <div class="panel">
-                  <h3>最近成员</h3>
+                  <h3 data-i18n="recentMembers">最近成员</h3>
                   <table>
-                    <thead><tr><th>用户</th><th>角色</th><th>状态</th></tr></thead>
+                    <thead><tr><th data-i18n="user">用户</th><th data-i18n="role">角色</th><th data-i18n="status">状态</th></tr></thead>
                     <tbody id="overview-recent-members"></tbody>
                   </table>
                 </div>
               </div>
               <div id="overview-member" class="hidden">
-                <h2>成员总览</h2>
-                <p class="lede">你是 member · 管理入口已闸住</p>
-                <div class="member-banner member">成员视图：可看个人用量与公告；成员管理需 admin。</div>
+                <h2 data-i18n="memberOverview">成员总览</h2>
+                <p class="lede" data-i18n="memberLede">你是 member · 管理入口已闸住</p>
+                <div class="member-banner member" data-i18n="memberBanner">成员视图：可看个人用量与公告；成员管理需 admin。</div>
                 <div class="stats">
-                  <div class="stat"><div class="k">我的用量</div><div class="v" id="ov-member-month">0</div><div class="s">token · 本月</div></div>
-                  <div class="stat"><div class="k">今日</div><div class="v" id="ov-member-today">0</div><div class="s">token</div></div>
+                  <div class="stat"><div class="k" data-i18n="myUsage">我的用量</div><div class="v" id="ov-member-month">0</div><div class="s" data-i18n="tokenMonth">token · 本月</div></div>
+                  <div class="stat"><div class="k" data-i18n="today">今日</div><div class="v" id="ov-member-today">0</div><div class="s">token</div></div>
                 </div>
 
                 <div class="wb-enter-card">
                   <div class="wb-copy">
-                    <div class="wb-k">进入工作台</div>
-                    <div class="wb-s">打开座位桌面占位页（本 demo 内 mock，不跳真实端口）</div>
+                    <div class="wb-k" data-i18n="enterWb">进入工作台</div>
+                    <div class="wb-s" data-i18n="enterWbSub">打开座位桌面占位页（本 demo 内 mock，不跳真实端口）</div>
                   </div>
-                  <button class="btn-enter-wb" type="button" data-enter-wb>进入工作台</button>
+                  <button class="btn-enter-wb" type="button" data-enter-wb data-i18n="enterWb">进入工作台</button>
                 </div>
                 <div class="panel">
                   <h3>Member 区</h3>
                   <div class="gate-box">
-                    <div style="font-size:0.9rem;font-weight:550">个人工具</div>
-                    <div style="font-size:0.8rem;color:var(--muted);margin:6px 0 12px">admin 与 member 均可进入</div>
-                    <button class="sm" type="button" id="btn-member-zone">进入 Member 区</button>
+                    <div style="font-size:0.9rem;font-weight:550" data-i18n="personalTools">个人工具</div>
+                    <div style="font-size:0.8rem;color:var(--muted);margin:6px 0 12px" data-i18n="bothRoles">admin 与 member 均可进入</div>
+                    <button class="sm" type="button" id="btn-member-zone" data-i18n="enterMember">进入 Member 区</button>
                     <div class="status" id="member-status-home"></div>
                   </div>
                 </div>
                 <div class="panel">
                   <h3>Admin-only（闸）</h3>
                   <div class="gate-box locked">
-                    <div style="font-size:0.9rem;font-weight:550;color:var(--deny)">无权限</div>
-                    <div style="font-size:0.8rem;color:var(--deny);margin:6px 0 12px;opacity:.85">座位开通 / 预算闸 · 仅 admin</div>
-                    <button class="sm" type="button" id="btn-admin-zone-member">尝试进入</button>
+                    <div style="font-size:0.9rem;font-weight:550;color:var(--deny)" data-i18n="noAccess">无权限</div>
+                    <div style="font-size:0.8rem;color:var(--deny);margin:6px 0 12px;opacity:.85" data-i18n="adminOnlyGate">座位开通 / 预算闸 · 仅 admin</div>
+                    <button class="sm" type="button" id="btn-admin-zone-member" data-i18n="tryEnter">尝试进入</button>
                     <div class="status" id="admin-status-member"></div>
                   </div>
                 </div>
               </div>
               <div class="panel" id="update-panel">
-                <h3>更新</h3>
-                <p class="lede" id="update-current">当前版本</p>
+                <h3 data-i18n="update">更新</h3>
+                <p class="lede" id="update-current" data-i18n="currentVersion">当前版本</p>
                 <p style="margin:8px 0 0;font-size:0.84rem">
                   <a id="update-github" href="https://github.com/TokenAI-Beta/anywork-portal-auth" target="_blank" rel="noopener" style="color:var(--text)">GitHub</a>
                 </p>
                 <div class="row-actions" style="margin-top:12px">
-                  <button type="button" class="sm" id="btn-check-update">检查更新</button>
+                  <button type="button" class="sm" id="btn-check-update" data-i18n="checkUpdate">检查更新</button>
                 </div>
                 <div id="update-result" style="margin-top:10px;font-size:0.84rem;color:var(--muted)"></div>
                 <div class="row-actions hidden" id="update-choice" style="margin-top:10px">
-                  <button type="button" class="sm primary" id="btn-upgrade">升级</button>
-                  <button type="button" class="sm" id="btn-skip-update">不升级</button>
+                  <button type="button" class="sm primary" id="btn-upgrade" data-i18n="upgrade">升级</button>
+                  <button type="button" class="sm" id="btn-skip-update" data-i18n="skipUpgrade">不升级</button>
                 </div>
               </div>
             </div>
 
             <div id="tab-members" class="hidden">
-              <h2>成员管理</h2>
-              <p class="lede">开座位 / 删实例 · mock（仅本页状态，不写库）</p>
+              <h2 data-i18n="memberAdmin">成员管理</h2>
+              <p class="lede" data-i18n="memberAdminLede">开座位 / 删实例 · mock（仅本页状态，不写库）</p>
               <div class="panel">
                 <div class="members-toolbar">
-                  <input id="reg-user" placeholder="新用户名" autocomplete="off" />
-                  <button type="button" class="sm primary" id="btn-reg-member" style="flex:0">注册成员</button>
-                  <button type="button" class="sm" id="btn-refresh-seats">刷新座位状态</button>
-                  <button type="button" class="sm ghost" id="btn-reset-members">重置列表</button>
+                  <input id="reg-user" placeholder="新用户名" autocomplete="off" data-i18n-placeholder="newUser" />
+                  <button type="button" class="sm primary" id="btn-reg-member" style="flex:0" data-i18n="register">注册成员</button>
+                  <button type="button" class="sm" id="btn-refresh-seats" data-i18n="refreshSeats">刷新座位状态</button>
+                  <button type="button" class="sm ghost" id="btn-reset-members" data-i18n="resetList">重置列表</button>
                 </div>
                 <table>
                   <thead>
                     <tr>
-                      <th>用户</th><th>角色</th><th>座位状态</th><th>端口</th><th>预算</th><th>操作</th>
+                      <th data-i18n="user">用户</th><th data-i18n="role">角色</th><th data-i18n="seatState">座位状态</th><th data-i18n="port">端口</th><th data-i18n="budget">预算</th><th data-i18n="actions">操作</th>
                     </tr>
                   </thead>
                   <tbody id="members-tbody"></tbody>
                 </table>
-                <div class="members-note" id="members-note">未开 → 启动中 → 已开（假端口）。删账号会一并清实例。</div>
+                <div class="members-note" id="members-note" data-i18n="memberNote">未开 → 启动中 → 已开（假端口）。删账号会一并清实例。</div>
               </div>
             </div>
 
             <div id="tab-usage" class="hidden">
-              <h2>工作台用量</h2>
+              <h2 data-i18n="usageTitle">工作台用量</h2>
               <p class="lede" id="usage-lede">按账号汇总座位会话中的 token</p>
               <div class="stats" id="usage-stats-admin">
-                <div class="stat"><div class="k">今日</div><div class="v" id="usage-today">0</div><div class="s">token</div></div>
-                <div class="stat"><div class="k">本月</div><div class="v" id="usage-month">0</div><div class="s">token</div></div>
-                <div class="stat"><div class="k">本月调用</div><div class="v" id="usage-calls">0</div><div class="s">次</div></div>
-                <div class="stat"><div class="k">费用</div><div class="v">—</div><div class="s">见各家控制台</div></div>
+                <div class="stat"><div class="k" data-i18n="today">今日</div><div class="v" id="usage-today">0</div><div class="s">token</div></div>
+                <div class="stat"><div class="k" data-i18n="thisMonth">本月</div><div class="v" id="usage-month">0</div><div class="s">token</div></div>
+                <div class="stat"><div class="k" data-i18n="monthCalls">本月调用</div><div class="v" id="usage-calls">0</div><div class="s" data-i18n="times">次</div></div>
+                <div class="stat"><div class="k" data-i18n="cost">费用</div><div class="v">—</div><div class="s" data-i18n="seeConsole">见各家控制台</div></div>
               </div>
               <div class="stats hidden" id="usage-stats-member">
-                <div class="stat"><div class="k">今日</div><div class="v" id="usage-today-member">0</div><div class="s">token</div></div>
-                <div class="stat"><div class="k">本月</div><div class="v" id="usage-month-member">0</div><div class="s">token</div></div>
-                <div class="stat"><div class="k">本月调用</div><div class="v" id="usage-calls-member">0</div><div class="s">次</div></div>
-                <div class="stat"><div class="k">费用</div><div class="v">—</div><div class="s">见各家控制台</div></div>
+                <div class="stat"><div class="k" data-i18n="today">今日</div><div class="v" id="usage-today-member">0</div><div class="s">token</div></div>
+                <div class="stat"><div class="k" data-i18n="thisMonth">本月</div><div class="v" id="usage-month-member">0</div><div class="s">token</div></div>
+                <div class="stat"><div class="k" data-i18n="monthCalls">本月调用</div><div class="v" id="usage-calls-member">0</div><div class="s" data-i18n="times">次</div></div>
+                <div class="stat"><div class="k" data-i18n="cost">费用</div><div class="v">—</div><div class="s" data-i18n="seeConsole">见各家控制台</div></div>
               </div>
               <div class="panel" id="usage-table-admin">
-                <h3>团队明细</h3>
+                <h3 data-i18n="teamDetail">团队明细</h3>
                 <div id="usage-team" class="announce-empty">暂无记录</div>
               </div>
               <div class="panel hidden" id="usage-table-member">
-                <h3>我的明细</h3>
+                <h3 data-i18n="myDetail">我的明细</h3>
                 <div id="usage-mine" class="announce-empty">暂无记录</div>
               </div>
               <div class="panel" id="usage-hist-admin">
-                <h3>历史记录 · 按日汇总（团队）</h3>
+                <h3 data-i18n="dailyTeam">历史记录 · 按日汇总（团队）</h3>
                 <div id="usage-days" class="announce-empty">暂无记录</div>
               </div>
               <div class="panel" id="usage-hist-admin-calls">
-                <h3>历史记录 · 按次（团队最近）</h3>
+                <h3 data-i18n="callsTeam">历史记录 · 按次（团队最近）</h3>
                 <div id="usage-recent" class="announce-empty">暂无记录</div>
               </div>
               <div class="panel hidden" id="usage-hist-member">
-                <h3>历史记录 · 按日汇总（我的）</h3>
+                <h3 data-i18n="dailyMine">历史记录 · 按日汇总（我的）</h3>
                 <div id="usage-days-member" class="announce-empty">暂无记录</div>
               </div>
               <div class="panel hidden" id="usage-hist-member-calls">
-                <h3>历史记录 · 按次（我的最近）</h3>
+                <h3 data-i18n="callsMine">历史记录 · 按次（我的最近）</h3>
                 <div id="usage-recent-member" class="announce-empty">暂无记录</div>
               </div>
             </div>
 
             <div id="tab-announce" class="hidden">
-              <h2>公告</h2>
+              <h2 data-i18n="navAnnounce">公告</h2>
               <p class="lede" id="announce-lede">全员可读 · admin 可发布 / 置顶 / 删除（mock）</p>
               <div class="panel">
                 <div class="announce-toolbar hidden" id="announce-admin-bar">
-                  <input id="ann-title" placeholder="标题" maxlength="80" />
-                  <textarea id="ann-body" placeholder="正文（mock，不写现网）" maxlength="500"></textarea>
+                  <input id="ann-title" placeholder="标题" maxlength="80" data-i18n-placeholder="title" />
+                  <textarea id="ann-body" placeholder="正文（mock，不写现网）" maxlength="500" data-i18n-placeholder="body"></textarea>
                   <label style="display:flex;align-items:center;gap:6px;font-size:0.78rem;color:var(--muted);white-space:nowrap">
-                    <input type="checkbox" id="ann-pin" style="width:auto" /> 置顶
+                    <input type="checkbox" id="ann-pin" style="width:auto" /> <span data-i18n="pin">置顶</span>
                   </label>
-                  <button type="button" class="sm primary" id="btn-ann-publish" style="flex:0">发布公告</button>
+                  <button type="button" class="sm primary" id="btn-ann-publish" style="flex:0" data-i18n="publish">发布公告</button>
                 </div>
                 <div id="announce-list"></div>
-                <div class="members-note" id="announce-note">member 只读；admin 可管理。localStorage 持久，可重置。</div>
+                <div class="members-note" id="announce-note" data-i18n="annNote">member 只读；admin 可管理。localStorage 持久，可重置。</div>
               </div>
             </div>
 
 
             <div id="tab-calendar" class="hidden">
-              <h2>日历</h2>
-              <p class="lede">系统月历视觉 + dsh-auto-memory 日轴（点日期展开）</p>
+              <h2 data-i18n="navCalendar">日历</h2>
+              <p class="lede" data-i18n="calLede">系统月历视觉 + dsh-auto-memory 日轴（点日期展开）</p>
               <div class="cal-shell">
                 <div class="cal-hero">
                   <div>
                     <div class="cal-hero-date" id="cal-hero-date">11月5日，星期四</div>
                     <div class="cal-hero-lunar" id="cal-hero-lunar">九月廿七</div>
                   </div>
-                  <button type="button" class="cal-hero-chev" id="btn-cal-expand" title="展开/收起日轴">▾</button>
+                  <button type="button" class="cal-hero-chev" id="btn-cal-expand" title="展开/收起日轴" data-i18n-title="toggleAxis">▾</button>
                 </div>
                 <div class="cal-monthbar">
                   <button type="button" class="cal-month-title" id="cal-month-title" title="点选月份 / 年份">2026年11月</button>
                   <div class="cal-nav">
-                    <select id="cal-tz" class="cal-tz" title="时区，可不选"></select>
-                    <button type="button" class="sm" id="btn-cal-prev" title="上月">︿</button>
-                    <button type="button" class="sm" id="btn-cal-today">今天</button>
-                    <button type="button" class="sm" id="btn-cal-next" title="下月">﹀</button>
+                    <select id="cal-tz" class="cal-tz" title="时区，可不选" data-i18n-title="tzTitle"></select>
+                    <button type="button" class="sm" id="btn-cal-prev" title="上月" data-i18n-title="prevMonth">︿</button>
+                    <button type="button" class="sm" id="btn-cal-today" data-i18n="todayBtn">今天</button>
+                    <button type="button" class="sm" id="btn-cal-next" title="下月" data-i18n-title="nextMonth">﹀</button>
                   </div>
                 </div>
                 <div class="cal-month-grid" id="cal-month-grid"></div>
@@ -790,55 +810,55 @@
                   <div class="cal-day-panel-head">
                     <h3 id="cal-axis-heading">日视图 · 07:00–22:00</h3>
                     <div class="cal-track-filter" id="cal-track-filter">
-                      <button type="button" class="on" data-track="all">全部</button>
-                      <button type="button" data-track="local">本地</button>
-                      <button type="button" data-track="team">团队</button>
+                      <button type="button" class="on" data-track="all" data-i18n="all">全部</button>
+                      <button type="button" data-track="local" data-i18n="local">本地</button>
+                      <button type="button" data-track="team" data-i18n="team">团队</button>
                     </div>
                   </div>
                   <div class="cal-legend">
-                    <span><i style="background:#f07178"></i>紧急·重要</span>
-                    <span><i style="background:#e6a15c"></i>紧急·次要</span>
-                    <span><i style="background:#8b8b93"></i>普通</span>
-                    <span><i style="background:#5c5c66"></i>低优</span>
-                    <span class="cal-tag local">本地</span>
-                    <span class="cal-tag team">团队</span>
+                    <span><i style="background:#f07178"></i><span data-i18n="urg_critical">紧急·重要</span></span>
+                    <span><i style="background:#e6a15c"></i><span data-i18n="urg_high">紧急·次要</span></span>
+                    <span><i style="background:#8b8b93"></i><span data-i18n="urg_normal">普通</span></span>
+                    <span><i style="background:#5c5c66"></i><span data-i18n="urg_low">低优</span></span>
+                    <span class="cal-tag local" data-i18n="local">本地</span>
+                    <span class="cal-tag team" data-i18n="team">团队</span>
                   </div>
                   <div class="cal-day" id="cal-day"></div>
                 </div>
               </div>
-              <div class="cal-note">点一天，再点下面空着的小时，就能写入这件事。</div>
+              <div class="cal-note" data-i18n="calNote">点一天，再点下面空着的小时，就能写入这件事。</div>
             </div>
 
             <div id="tab-api" class="hidden">
-              <h2>API接口</h2>
+              <h2 data-i18n="navApi">API接口</h2>
               <p class="lede">coming soon</p>
             </div>
 
             <div id="workbench-view" class="hidden">
           <div class="wb-bar">
             <div>
-              <div class="wb-title">工作台</div>
-              <div class="wb-sub">座位桌面占位 · mock（不跳真实端口）</div>
+              <div class="wb-title" data-i18n="workbench">工作台</div>
+              <div class="wb-sub" data-i18n="wbSub">座位桌面占位 · mock（不跳真实端口）</div>
             </div>
             <div style="display:flex;gap:8px;align-items:center">
               <span id="wb-who" style="font-size:0.8rem;color:var(--muted)"></span>
-              <button class="sm" type="button" id="btn-back-portal">返回门户</button>
+              <button class="sm" type="button" id="btn-back-portal" data-i18n="backPortal">返回门户</button>
             </div>
           </div>
           <div class="wb-body">
             <aside class="wb-rail" id="wb-rail">
-              <h3>会话</h3>
+              <h3 data-i18n="chats">会话</h3>
               <div class="wb-chat-item active" data-wb-chat="welcome">
-                <div class="n">欢迎</div>
-                <div class="p">今天想从哪开始？</div>
+                <div class="n" data-i18n="chatWelcome">欢迎</div>
+                <div class="p" data-i18n="chatWelcomeSub">今天想从哪开始？</div>
               </div>
               <div class="wb-chat-item" data-wb-chat="weekly">
-                <div class="n">周报草稿</div>
-                <div class="p">mock · 假会话</div>
+                <div class="n" data-i18n="chatWeekly">周报草稿</div>
+                <div class="p" data-i18n="chatMock">mock · 假会话</div>
               </div>
               <div class="wb-chat-item" data-wb-chat="kb">
-                <div class="n">资料库速查</div>
-                <div class="p">mock · 假会话</div>
+                <div class="n" data-i18n="chatKb">资料库速查</div>
+                <div class="p" data-i18n="chatMock">mock · 假会话</div>
               </div>
             </aside>
             <div class="wb-main">
@@ -849,16 +869,16 @@
               </div>
               <div class="wb-fake-thread" id="wb-thread"></div>
               <div class="wb-composer">
-                <input id="wb-input" placeholder="输入 mock 消息（仅本页，不下真）" />
-                <button class="sm primary" type="button" id="btn-wb-send" style="flex:0">发送</button>
+                <input id="wb-input" placeholder="输入 mock 消息（仅本页，不下真）" data-i18n-placeholder="wbInput" />
+                <button class="sm primary" type="button" id="btn-wb-send" style="flex:0" data-i18n="send">发送</button>
               </div>
-              <div class="wb-note">视觉延续深色 Linear / DSH 风 · 港 / lnk / 现网未动 · composer 为本地 mock</div>
+              <div class="wb-note" data-i18n="wbNote">视觉延续深色 Linear / DSH 风 · 港 / lnk / 现网未动 · composer 为本地 mock</div>
             </div>
           </div>
         </div>
       </section>
 
-      <div id="login-foot" class="foot">anywork-portal-auth · 本地 mock · 未装进现网 DSH</div>
+      <div id="login-foot" class="foot" data-i18n="loginFoot">anywork-portal-auth · 本地 mock · 未装进现网 DSH</div>
     </div>
   </div>
 
@@ -871,7 +891,7 @@
       };
 
       var remote = window.__ANYWORK_PORTAL_REMOTE__ === true;
-      var PORTAL_VERSION = window.__ANYWORK_PORTAL_VERSION__ || "0.2.29";
+      var PORTAL_VERSION = window.__ANYWORK_PORTAL_VERSION__ || "0.2.30";
       var GITHUB_URL = window.__ANYWORK_PORTAL_GITHUB__ || "https://github.com/TokenAI-Beta/anywork-portal-auth";
       var pendingUpdate = "";
       var API = "/plugins/anywork-portal-auth";
@@ -879,6 +899,202 @@
       var membersCache = null;
       var annsCache = null;
       var pushTimer = null;
+      var LANG_KEY = "anywork_portal_auth_lang";
+      var lang = "zh";
+      try { if (localStorage.getItem(LANG_KEY) === "en") lang = "en"; } catch (e) {}
+      var lastUsage = null;
+      var lastUpdate = null;
+      var I18N = {
+        zh: {
+          loginTitle: "成员登录", portalSub: "demo mock · 非现网", username: "用户名", password: "密码", signIn: "登录", signOut: "登出",
+          navOverview: "总览", navMembers: "成员", navUsage: "用量", navAnnounce: "公告", navCalendar: "日历", navApi: "API接口",
+          pwTitle: "修改登录密码", pwLede: "只能修改当前登录账号。新注册成员的初始密码是 member。",
+          pwCurrent: "当前密码", pwNext: "新密码", pwAgain: "再输入一次", save: "保存",
+          adminOverview: "管理总览", seats: "座位", monthUsage: "本月用量", seatHealth: "座位健康",
+          ovNote: "座位 / 公告数字跟成员页与公告板联动（mock）",
+          enterWb: "进入工作台", enterWbSub: "打开座位桌面占位页（本 demo 内 mock，不跳真实端口）",
+          recentMembers: "最近成员", user: "用户", role: "角色", status: "状态",
+          memberOverview: "成员总览", memberLede: "你是 member · 管理入口已闸住",
+          memberBanner: "成员视图：可看个人用量与公告；成员管理需 admin。",
+          myUsage: "我的用量", tokenMonth: "token · 本月", today: "今日", thisMonth: "本月",
+          personalTools: "个人工具", bothRoles: "admin 与 member 均可进入", enterMember: "进入 Member 区",
+          noAccess: "无权限", adminOnlyGate: "座位开通 / 预算闸 · 仅 admin", tryEnter: "尝试进入",
+          update: "更新", currentVersion: "当前版本", checkUpdate: "检查更新", upgrade: "升级", skipUpgrade: "不升级",
+          memberAdmin: "成员管理", memberAdminLede: "开座位 / 删实例 · mock（仅本页状态，不写库）",
+          newUser: "新用户名", register: "注册成员", refreshSeats: "刷新座位状态", resetList: "重置列表",
+          seatState: "座位状态", port: "端口", budget: "预算", actions: "操作",
+          memberNote: "未开 → 启动中 → 已开（假端口）。删账号会一并清实例。",
+          usageTitle: "工作台用量", monthCalls: "本月调用", times: "次", cost: "费用", seeConsole: "见各家控制台",
+          teamDetail: "团队明细", myDetail: "我的明细",
+          dailyTeam: "历史记录 · 按日汇总（团队）", callsTeam: "历史记录 · 按次（团队最近）",
+          dailyMine: "历史记录 · 按日汇总（我的）", callsMine: "历史记录 · 按次（我的最近）",
+          title: "标题", body: "正文（mock，不写现网）", pin: "置顶", unpin: "取消置顶", publish: "发布公告", del: "删除",
+          annNote: "member 只读；admin 可管理。localStorage 持久，可重置。",
+          calLede: "系统月历视觉 + dsh-auto-memory 日轴（点日期展开）",
+          toggleAxis: "展开/收起日轴", tzTitle: "时区，可不选", prevMonth: "上月", nextMonth: "下月", todayBtn: "今天",
+          all: "全部", local: "本地", team: "团队",
+          urg_critical: "紧急·重要", urg_high: "紧急·次要", urg_normal: "普通", urg_low: "低优",
+          calNote: "点一天，再点下面空着的小时，就能写入这件事。",
+          workbench: "工作台", wbSub: "座位桌面占位 · mock（不跳真实端口）", backPortal: "返回门户", chats: "会话",
+          wbInput: "输入 mock 消息（仅本页，不下真）", send: "发送",
+          wbNote: "视觉延续深色 Linear / DSH 风 · 港 / lnk / 现网未动 · composer 为本地 mock",
+          loginFoot: "anywork-portal-auth · 本地 mock · 未装进现网 DSH",
+          chatWelcome: "欢迎", chatWelcomeSub: "今天想从哪开始？", chatWeekly: "周报草稿", chatKb: "资料库速查", chatMock: "mock · 假会话",
+          seatUp: "已开", seatBoot: "启动中…", seatIdle: "空闲", seatOff: "未开",
+          online: "在线", booting: "启动中", noMembers: "暂无成员 · 可上方注册", noMembersShort: "暂无成员",
+          openSeat: "开座位", stopSeat: "停实例", deleteSeat: "删账号+实例",
+          empty: "暂无记录", colToday: "今日 token", colMonth: "本月 token", colCalls: "本月调用",
+          colDate: "日期", colToken: "token", colCall: "调用", colTime: "时间", colModel: "模型",
+          usageLede: "按账号汇总座位会话中的 token · 今日 / 本月（上海时区）· 不含金额",
+          usageLoading: "正在汇总座位会话…", usageLocal: "本地演示不读取会话用量", usageFail: "用量暂时读不到",
+          needAdminNav: "需要 admin", annManage: "可管理公告", annRead: "只读公告",
+          hintAdmin: "admin：成员管理 + 公告发布（mock）",
+          hintMember: "member：用量/日历/公告只读；成员管理需 admin",
+          badLogin: "用户未知或密码错误", portalDown: "门户暂时连不上",
+          pwNeed: "请填写当前密码和新密码", pwMismatch: "两次新密码不一致",
+          pwRule: "新密码需要 4–64 位，且不能包含空格", pwBad: "当前密码不正确",
+          pwOk: "已修改。下次请用新密码登录", pwLogin: "请先登录", pwDown: "门户暂时连不上",
+          dayView: "日视图", write: "写入", done: "完成", undo: "撤销",
+          pickYear: "点选年份", backMonths: "返回选月", pickMonth: "点选月份 / 年份",
+          tz_local: "跟随本机", tz_Asia_Shanghai: "中国", tz_Asia_Hong_Kong: "香港", tz_Asia_Tokyo: "东京",
+          tz_Asia_Singapore: "新加坡", tz_Asia_Dubai: "迪拜", tz_Europe_London: "伦敦", tz_Europe_Paris: "巴黎",
+          tz_America_New_York: "纽约", tz_America_Los_Angeles: "洛杉矶", tz_Pacific_Auckland: "奥克兰", tz_UTC: "UTC",
+          updFail: "连不上 GitHub", updCurrent: "当前版本 {v}", updLatest: "已是最新，当前 {v}",
+          updFound: "发现新版本 {latest}，当前 {v}", updChecking: "正在检查…", updKeep: "已保留当前版本 {v}",
+          updLocal: "本地演示不能安装更新", updAdmin: "需要管理员才能升级", updInstalling: "正在安装 {v}…",
+          updFailed: "升级没有完成", denyRole: "拒绝 · 无角色", allowAdmin: "允许 · admin",
+          denyRoleName: "拒绝 · {role}", allowRole: "允许 · {role}",
+          bootMsg: "正在拉起 {id} 座位…（mock ~1.2s）", bootDone: "{id} 已开 · 端口 :{port}（假数据）",
+          stopMsg: "已停 {id} 实例（mock）", delConfirm: "确认删除账号 {id} 并清除实例？此操作仅 mock，刷新可重置。",
+          delMsg: "已删账号+实例：{id}", probing: "探测中…", probeMsg: "正在重新探测座位状态…（mock）",
+          probeDone: "探测完成 · {ms}ms · {detail}", probeChanged: "状态抖动 {n} 项", probeSame: "无变化",
+          needName: "请输入新用户名", badName: "用户名仅字母数字_-/2–24 位", exists: "{name} 已存在",
+          registered: "已注册 {name}（未开座位）· 登录密码 member",
+          resetOk: "已重置，并重新拉取 admin001", resetFail: "重置失败",
+          annAdmin: "admin：可发布 / 置顶 / 删除 · mock localStorage", annMember: "全员可读 · 管理需 admin",
+          noAnn: "暂无公告 · admin 可上方发布", needAdmin: "需要 admin", needAnn: "请填写标题与正文",
+          published: "已发布：{title}", pinUpdated: "已更新置顶", delAnnConfirm: "删除该公告？（仅 mock）", delAnn: "已删除公告",
+          healthSub: "在线 · mock", pinnedCount: "{n} 置顶",
+          seatLine: "{up} 在线 · {idle} 空闲 · {off} 未开/启动"
+        },
+        en: {
+          loginTitle: "Member sign in", portalSub: "demo mock · not production", username: "Username", password: "Password", signIn: "Sign in", signOut: "Sign out",
+          navOverview: "Overview", navMembers: "Members", navUsage: "Usage", navAnnounce: "Notices", navCalendar: "Calendar", navApi: "API",
+          pwTitle: "Change password", pwLede: "You can change only the account you are signed in as. New members start with password member.",
+          pwCurrent: "Current password", pwNext: "New password", pwAgain: "Repeat new password", save: "Save",
+          adminOverview: "Admin overview", seats: "Seats", monthUsage: "Usage this month", seatHealth: "Seat health",
+          ovNote: "Seat and notice counts follow the members page and the board (mock).",
+          enterWb: "Enter workbench", enterWbSub: "Open the seat desktop placeholder (mock in this demo, no real port).",
+          recentMembers: "Recent members", user: "User", role: "Role", status: "Status",
+          memberOverview: "Member overview", memberLede: "You are a member · admin tools are locked",
+          memberBanner: "Member view: your usage and notices. Member admin requires an admin.",
+          myUsage: "My usage", tokenMonth: "tokens · this month", today: "Today", thisMonth: "This month",
+          personalTools: "Personal tools", bothRoles: "Both admin and member can enter", enterMember: "Enter member area",
+          noAccess: "No access", adminOnlyGate: "Seat and budget controls · admin only", tryEnter: "Try to enter",
+          update: "Update", currentVersion: "Current version", checkUpdate: "Check for updates", upgrade: "Upgrade", skipUpgrade: "Not now",
+          memberAdmin: "Members", memberAdminLede: "Open a seat or remove an instance · mock (this page only)",
+          newUser: "New username", register: "Add member", refreshSeats: "Refresh seats", resetList: "Reset list",
+          seatState: "Seat", port: "Port", budget: "Budget", actions: "Actions",
+          memberNote: "Off → starting → on (fake port). Deleting an account also clears its instance.",
+          usageTitle: "Workbench usage", monthCalls: "Calls this month", times: "calls", cost: "Cost", seeConsole: "See each provider",
+          teamDetail: "Team", myDetail: "Mine",
+          dailyTeam: "History · by day (team)", callsTeam: "History · by call (team, recent)",
+          dailyMine: "History · by day (mine)", callsMine: "History · by call (mine, recent)",
+          title: "Title", body: "Body (mock, not production)", pin: "Pin", unpin: "Unpin", publish: "Publish", del: "Delete",
+          annNote: "Members can read. Admins can manage. Stored in this browser.",
+          calLede: "Month calendar plus a day axis (open a date).",
+          toggleAxis: "Show or hide the day axis", tzTitle: "Time zone, optional", prevMonth: "Previous month", nextMonth: "Next month", todayBtn: "Today",
+          all: "All", local: "Local", team: "Team",
+          urg_critical: "Urgent · important", urg_high: "Urgent · minor", urg_normal: "Normal", urg_low: "Low",
+          calNote: "Pick a day, then an empty hour, to write an item.",
+          workbench: "Workbench", wbSub: "Seat desktop placeholder · mock (no real port)", backPortal: "Back to portal", chats: "Chats",
+          wbInput: "Mock message (this page only)", send: "Send",
+          wbNote: "Dark workbench styling · local mock composer",
+          loginFoot: "anywork-portal-auth · local mock · not installed in production DSH",
+          chatWelcome: "Welcome", chatWelcomeSub: "Where do you want to start?", chatWeekly: "Weekly draft", chatKb: "Library lookup", chatMock: "mock chat",
+          seatUp: "On", seatBoot: "Starting…", seatIdle: "Idle", seatOff: "Off",
+          online: "Online", booting: "Starting", noMembers: "No members yet · add one above", noMembersShort: "No members",
+          openSeat: "Open seat", stopSeat: "Stop", deleteSeat: "Delete account",
+          empty: "No records", colToday: "Today tokens", colMonth: "Month tokens", colCalls: "Calls this month",
+          colDate: "Date", colToken: "tokens", colCall: "Calls", colTime: "Time", colModel: "Model",
+          usageLede: "Tokens from each account's seat sessions · today / this month (Shanghai) · cost not included",
+          usageLoading: "Adding up seat sessions…", usageLocal: "The local demo does not read session usage", usageFail: "Usage is unavailable",
+          needAdminNav: "Admin required", annManage: "Can manage notices", annRead: "Read-only notices",
+          hintAdmin: "admin: member admin and notices (mock)",
+          hintMember: "member: usage, calendar, and notices are read-only; member admin requires an admin",
+          badLogin: "Unknown user or wrong password", portalDown: "Portal is unreachable",
+          pwNeed: "Enter the current password and a new one", pwMismatch: "The new passwords do not match",
+          pwRule: "Use 4–64 characters and no spaces", pwBad: "Current password is wrong",
+          pwOk: "Updated. Use the new password next time", pwLogin: "Sign in first", pwDown: "Portal is unreachable",
+          dayView: "Day", write: "Write", done: "Done", undo: "Undo",
+          pickYear: "Pick a year", backMonths: "Back to months", pickMonth: "Pick a month or year",
+          tz_local: "This device", tz_Asia_Shanghai: "China", tz_Asia_Hong_Kong: "Hong Kong", tz_Asia_Tokyo: "Tokyo",
+          tz_Asia_Singapore: "Singapore", tz_Asia_Dubai: "Dubai", tz_Europe_London: "London", tz_Europe_Paris: "Paris",
+          tz_America_New_York: "New York", tz_America_Los_Angeles: "Los Angeles", tz_Pacific_Auckland: "Auckland", tz_UTC: "UTC",
+          updFail: "Cannot reach GitHub", updCurrent: "Current version {v}", updLatest: "Up to date, current {v}",
+          updFound: "New version {latest}, current {v}", updChecking: "Checking…", updKeep: "Kept the current version {v}",
+          updLocal: "The local demo cannot install updates", updAdmin: "Only an admin can upgrade", updInstalling: "Installing {v}…",
+          updFailed: "Upgrade did not finish", denyRole: "Denied · no role", allowAdmin: "Allowed · admin",
+          denyRoleName: "Denied · {role}", allowRole: "Allowed · {role}",
+          bootMsg: "Starting seat {id}… (mock ~1.2s)", bootDone: "{id} is on · port :{port} (mock)",
+          stopMsg: "Stopped {id} (mock)", delConfirm: "Delete account {id} and its instance? Mock only; refresh can reset.",
+          delMsg: "Deleted account and instance: {id}", probing: "Checking…", probeMsg: "Checking seat status… (mock)",
+          probeDone: "Done · {ms}ms · {detail}", probeChanged: "{n} status changes", probeSame: "No change",
+          needName: "Enter a username", badName: "Use 2–24 letters, numbers, _ or -", exists: "{name} already exists",
+          registered: "Added {name} (seat off) · initial password member",
+          resetOk: "Reset, and admin001 is being started again", resetFail: "Reset failed",
+          annAdmin: "admin: publish, pin, or delete · mock", annMember: "Everyone can read · admin manages",
+          noAnn: "No notices · an admin can publish above", needAdmin: "Admin required", needAnn: "Enter a title and a body",
+          published: "Published: {title}", pinUpdated: "Pin updated", delAnnConfirm: "Delete this notice? (mock only)", delAnn: "Notice deleted",
+          healthSub: "online · mock", pinnedCount: "{n} pinned",
+          seatLine: "{up} online · {idle} idle · {off} off/starting"
+        }
+      };
+      function t(key, vars) {
+        var pack = I18N[lang] || I18N.zh;
+        var text = pack[key] != null ? pack[key] : (I18N.zh[key] != null ? I18N.zh[key] : key);
+        if (!vars) return text;
+        Object.keys(vars).forEach(function (name) {
+          text = text.split("{" + name + "}").join(String(vars[name]));
+        });
+        return text;
+      }
+      function applyI18n() {
+        document.documentElement.lang = lang === "en" ? "en" : "zh-CN";
+        document.querySelectorAll("[data-i18n]").forEach(function (el) {
+          el.textContent = t(el.getAttribute("data-i18n"));
+        });
+        document.querySelectorAll("[data-i18n-placeholder]").forEach(function (el) {
+          el.placeholder = t(el.getAttribute("data-i18n-placeholder"));
+        });
+        document.querySelectorAll("[data-i18n-title]").forEach(function (el) {
+          el.title = t(el.getAttribute("data-i18n-title"));
+        });
+        document.querySelectorAll("[data-set-lang]").forEach(function (btn) {
+          btn.classList.toggle("on", btn.getAttribute("data-set-lang") === lang);
+        });
+      }
+      function setLang(next) {
+        lang = next === "en" ? "en" : "zh";
+        try { localStorage.setItem(LANG_KEY, lang); } catch (e) {}
+        applyI18n();
+        if (typeof fillTzSelect === "function") fillTzSelect();
+        var session = readSession();
+        if (!session) return;
+        setAdminNav(session.role === "admin");
+        renderMembers();
+        renderAnnouncements();
+        renderOverviewFromMembers();
+        renderCalendar();
+        if (typeof renderWbThread === "function") renderWbThread();
+        if (lastUsage) paintUsage(lastUsage, session.role === "admin");
+        if (lastUpdate) showUpdate(lastUpdate);
+      }
+      document.addEventListener("click", function (event) {
+        var btn = event.target && event.target.closest && event.target.closest("[data-set-lang]");
+        if (!btn) return;
+        setLang(btn.getAttribute("data-set-lang"));
+      });
 
       function uid() {
         return "ds_" + Math.random().toString(36).slice(2, 10) + Date.now().toString(36).slice(-4);
@@ -1014,10 +1230,10 @@
         }, 1200);
       }
       function seatTag(seat) {
-        if (seat === "up") return '<span class="tag on">已开</span>';
-        if (seat === "booting") return '<span class="tag boot">启动中…</span>';
-        if (seat === "idle") return '<span class="tag wait">空闲</span>';
-        return '<span class="tag off">未开</span>';
+        if (seat === "up") return '<span class="tag on">' + t("seatUp") + "</span>";
+        if (seat === "booting") return '<span class="tag boot">' + t("seatBoot") + "</span>";
+        if (seat === "idle") return '<span class="tag wait">' + t("seatIdle") + "</span>";
+        return '<span class="tag off">' + t("seatOff") + "</span>";
       }
       function renderMembers() {
         var tbody = $("members-tbody");
@@ -1025,21 +1241,21 @@
         var list = loadMembers();
         renderOverviewFromMembers();
         if (!list.length) {
-          tbody.innerHTML = '<tr><td colspan="6" style="color:var(--faint)">暂无成员 · 可上方注册</td></tr>';
+          tbody.innerHTML = '<tr><td colspan="6" style="color:var(--faint)">' + t("noMembers") + "</td></tr>";
           return;
         }
         tbody.innerHTML = list.map(function (m) {
           var port = m.port ? '<span class="mono">:' + m.port + '</span>' : '<span class="mono">—</span>';
           var actions = '<div class="row-actions">';
           if (m.seat === "off" || m.seat === "idle") {
-            actions += '<button type="button" class="sm" data-act="boot" data-id="' + m.id + '">开座位</button>';
+            actions += '<button type="button" class="sm" data-act="boot" data-id="' + m.id + '">' + t("openSeat") + "</button>";
           } else if (m.seat === "booting") {
-            actions += '<button type="button" class="sm" disabled>启动中</button>';
+            actions += '<button type="button" class="sm" disabled>' + t("booting") + "</button>";
           } else if (m.seat === "up") {
-            actions += '<button type="button" class="sm" data-act="stop" data-id="' + m.id + '">停实例</button>';
+            actions += '<button type="button" class="sm" data-act="stop" data-id="' + m.id + '">' + t("stopSeat") + "</button>";
           }
           if (m.role !== "admin" || m.id !== "admin001") {
-            actions += '<button type="button" class="sm danger" data-act="delete" data-id="' + m.id + '">删账号+实例</button>';
+            actions += '<button type="button" class="sm danger" data-act="delete" data-id="' + m.id + '">' + t("deleteSeat") + "</button>";
           }
           actions += '</div>';
           return '<tr>' +
@@ -1064,7 +1280,7 @@
         m.port = null;
         saveMembers(list);
         renderMembers();
-        setMemberNote("正在拉起 " + id + " 座位…（mock ~1.2s）");
+        setMemberNote(t("bootMsg", { id: id }));
         if (bootTimers[id]) clearTimeout(bootTimers[id]);
         bootTimers[id] = setTimeout(function () {
           var list2 = loadMembers();
@@ -1074,7 +1290,7 @@
           m2.port = nextPort++;
           saveMembers(list2);
           renderMembers();
-          setMemberNote(id + " 已开 · 端口 :" + m2.port + "（假数据）");
+          setMemberNote(t("bootDone", { id: id, port: m2.port }));
         }, 1200);
       }
       function stopSeat(id) {
@@ -1085,15 +1301,15 @@
         m.port = null;
         saveMembers(list);
         renderMembers();
-        setMemberNote("已停 " + id + " 实例（mock）");
+        setMemberNote(t("stopMsg", { id: id }));
       }
       function deleteMember(id) {
-        if (!confirm("确认删除账号 " + id + " 并清除实例？此操作仅 mock，刷新可重置。")) return;
+        if (!confirm(t("delConfirm", { id: id }))) return;
         if (bootTimers[id]) { clearTimeout(bootTimers[id]); delete bootTimers[id]; }
         var list = loadMembers().filter(function (x) { return x.id !== id; });
         saveMembers(list);
         renderMembers();
-        setMemberNote("已删账号+实例：" + id);
+        setMemberNote(t("delMsg", { id: id }));
       }
 
       var refreshingSeats = false;
@@ -1101,8 +1317,8 @@
         if (refreshingSeats) return;
         refreshingSeats = true;
         var btn = $("btn-refresh-seats");
-        if (btn) { btn.disabled = true; btn.textContent = "探测中…"; }
-        setMemberNote("正在重新探测座位状态…（mock）");
+        if (btn) { btn.disabled = true; btn.textContent = t("probing"); }
+        setMemberNote(t("probeMsg"));
         var delay = 600 + Math.floor(Math.random() * 700);
         setTimeout(function () {
           var list = loadMembers();
@@ -1142,29 +1358,29 @@
           saveMembers(list);
           renderMembers();
           refreshingSeats = false;
-          if (btn) { btn.disabled = false; btn.textContent = "刷新座位状态"; }
-          setMemberNote("探测完成 · " + delay + "ms · " + (changed ? ("状态抖动 " + changed + " 项") : "无变化"));
+          if (btn) { btn.disabled = false; btn.textContent = t("refreshSeats"); }
+          setMemberNote(t("probeDone", { ms: delay, detail: changed ? t("probeChanged", { n: changed }) : t("probeSame") }));
         }, delay);
       }
 
       function registerMember() {
         var input = $("reg-user");
         var name = (input.value || "").trim().toLowerCase().replace(/\s+/g, "");
-        if (!name) { setMemberNote("请输入新用户名"); return; }
+        if (!name) { setMemberNote(t("needName")); return; }
         if (!/^[a-z0-9_\-]{2,24}$/.test(name)) {
-          setMemberNote("用户名仅字母数字_-/2–24 位");
+          setMemberNote(t("badName"));
           return;
         }
         var list = loadMembers();
         if (list.some(function (x) { return x.id === name; })) {
-          setMemberNote(name + " 已存在");
+          setMemberNote(t("exists", { name: name }));
           return;
         }
         list.push({ id: name, role: "member", budget: "0%", seat: "off", port: null });
         saveMembers(list);
         input.value = "";
         renderMembers();
-        setMemberNote("已注册 " + name + "（未开座位）· 登录密码 member");
+        setMemberNote(t("registered", { name: name }));
       }
 
 
@@ -1219,24 +1435,24 @@
         if (bar) bar.classList.toggle("hidden", !isAdmin);
         var lede = $("announce-lede");
         if (lede) lede.textContent = isAdmin
-          ? "admin：可发布 / 置顶 / 删除 · mock localStorage"
-          : "全员可读 · 管理需 admin";
+          ? t("annAdmin")
+          : t("annMember");
         var list = loadAnns().slice().sort(function (a, b) {
           if (a.pinned !== b.pinned) return a.pinned ? -1 : 1;
           return (b.at || "").localeCompare(a.at || "");
         });
         if (!list.length) {
-          listEl.innerHTML = '<div class="announce-empty">暂无公告 · admin 可上方发布</div>';
+          listEl.innerHTML = '<div class="announce-empty">' + t("noAnn") + "</div>";
           return;
         }
         listEl.innerHTML = list.map(function (a) {
-          var pin = a.pinned ? '<span class="pin-badge">置顶</span>' : "";
+          var pin = a.pinned ? '<span class="pin-badge">' + t("pin") + "</span>" : "";
           var actions = "";
           if (isAdmin) {
             actions = '<div class="row-actions">' +
               '<button type="button" class="sm" data-ann-act="pin" data-id="' + a.id + '">' +
-              (a.pinned ? "取消置顶" : "置顶") + "</button>" +
-              '<button type="button" class="sm danger" data-ann-act="del" data-id="' + a.id + '">删除</button>' +
+              (a.pinned ? t("unpin") : t("pin")) + "</button>" +
+              '<button type="button" class="sm danger" data-ann-act="del" data-id="' + a.id + '">' + t("del") + "</button>" +
               "</div>";
           }
           return '<div class="announce-item' + (a.pinned ? " pinned" : "") + '">' +
@@ -1248,11 +1464,11 @@
       }
       function publishAnn() {
         var s = readSession();
-        if (!s || s.role !== "admin") { setAnnNote("需要 admin"); return; }
+        if (!s || s.role !== "admin") { setAnnNote(t("needAdmin")); return; }
         var title = (($("ann-title") && $("ann-title").value) || "").trim();
         var body = (($("ann-body") && $("ann-body").value) || "").trim();
         var pin = $("ann-pin") && $("ann-pin").checked;
-        if (!title || !body) { setAnnNote("请填写标题与正文"); return; }
+        if (!title || !body) { setAnnNote(t("needAnn")); return; }
         var list = loadAnns();
         list.unshift({
           id: "a_" + Math.random().toString(36).slice(2, 8),
@@ -1267,7 +1483,7 @@
         if ($("ann-pin")) $("ann-pin").checked = false;
         renderAnnouncements();
         renderOverviewFromMembers();
-        setAnnNote("已发布：" + title);
+        setAnnNote(t("published", { title: title }));
       }
       function toggleAnnPin(id) {
         var list = loadAnns();
@@ -1275,21 +1491,21 @@
         saveAnns(list);
         renderAnnouncements();
         renderOverviewFromMembers();
-        setAnnNote("已更新置顶");
+        setAnnNote(t("pinUpdated"));
       }
       function deleteAnn(id) {
-        if (!confirm("删除该公告？（仅 mock）")) return;
+        if (!confirm(t("delAnnConfirm"))) return;
         saveAnns(loadAnns().filter(function (a) { return a.id !== id; }));
         renderAnnouncements();
         renderOverviewFromMembers();
-        setAnnNote("已删除公告");
+        setAnnNote(t("delAnn"));
       }
 
       function seatStatusLabel(seat) {
-        if (seat === "up") return '<span class="tag on">在线</span>';
-        if (seat === "booting") return '<span class="tag boot">启动中</span>';
-        if (seat === "idle") return '<span class="tag wait">空闲</span>';
-        return '<span class="tag off">未开</span>';
+        if (seat === "up") return '<span class="tag on">' + t("online") + "</span>";
+        if (seat === "booting") return '<span class="tag boot">' + t("booting") + "</span>";
+        if (seat === "idle") return '<span class="tag wait">' + t("seatIdle") + "</span>";
+        return '<span class="tag off">' + t("seatOff") + "</span>";
       }
       function renderOverviewFromMembers() {
         var list = loadMembers();
@@ -1298,19 +1514,19 @@
         var idle = list.filter(function (m) { return m.seat === "idle"; }).length;
         var off = list.filter(function (m) { return m.seat === "off" || m.seat === "booting"; }).length;
         var t = $("ov-seat-total"); if (t) t.textContent = String(total);
-        var sub = $("ov-seat-sub"); if (sub) sub.textContent = up + " 在线 · " + idle + " 空闲 · " + off + " 未开/启动";
+        var sub = $("ov-seat-sub"); if (sub) sub.textContent = t("seatLine", { up: up, idle: idle, off: off });
         var hv = $("ov-health-v"); if (hv) hv.textContent = up + "/" + (total || 1);
-        var hs = $("ov-health-s"); if (hs) hs.textContent = "在线 · mock";
+        var hs = $("ov-health-s"); if (hs) hs.textContent = t("healthSub");
         var anns = loadAnns();
         var pinned = anns.filter(function (a) { return a.pinned; }).length;
         var av = $("ov-ann-v"); if (av) av.textContent = String(anns.length);
-        var as_ = $("ov-ann-s"); if (as_) as_.textContent = pinned + " 置顶";
+        var as_ = $("ov-ann-s"); if (as_) as_.textContent = t("pinnedCount", { n: pinned });
         var tb = $("overview-recent-members");
         if (tb) {
           var recent = list.slice(0, 5);
           tb.innerHTML = recent.map(function (m) {
             return "<tr><td>" + m.id + "</td><td>" + m.role + "</td><td>" + seatStatusLabel(m.seat) + "</td></tr>";
-          }).join("") || '<tr><td colspan="3" style="color:var(--faint)">暂无成员</td></tr>';
+          }).join("") || '<tr><td colspan="3" style="color:var(--faint)">' + t("noMembersShort") + "</td></tr>";
         }
       }
 
@@ -1460,9 +1676,9 @@
       }
       function zoneLabel(id) {
         for (var i = 0; i < CAL_ZONES.length; i++) {
-          if (CAL_ZONES[i].id === id) return id ? CAL_ZONES[i].label : "本机";
+          if (CAL_ZONES[i].id === id) return t(id ? ("tz_" + id.replace(/\//g, "_")) : "tz_local");
         }
-        return id || "本机";
+        return id || t("tz_local");
       }
       function todayYmd() {
         if (!calTz) return ymdFromDate(new Date());
@@ -1546,17 +1762,12 @@
       function openHourWrite(hour, slot) {
         if (!slot) return;
         var urgency = "normal";
-        var levels = [
-          ["critical", "紧急·重要"],
-          ["high", "紧急·次要"],
-          ["normal", "普通"],
-          ["low", "低优"]
-        ];
-        slot.innerHTML = '<input class="cal-write" maxlength="80" placeholder="写入" />' +
+        var levels = ["critical", "high", "normal", "low"];
+        slot.innerHTML = '<input class="cal-write" maxlength="80" placeholder="' + t("write") + '" />' +
           '<div class="cal-write-urg">' +
           levels.map(function (pair) {
-            return '<button type="button" class="sm' + (pair[0] === "normal" ? " on" : "") +
-              '" data-urg="' + pair[0] + '">' + pair[1] + "</button>";
+            return '<button type="button" class="sm' + (pair === "normal" ? " on" : "") +
+              '" data-urg="' + pair + '">' + t("urg_" + pair) + "</button>";
           }).join("") +
           "</div>";
         var input = slot.querySelector("input");
@@ -1614,7 +1825,9 @@
         var hero = $("cal-hero-date");
         var lunar = $("cal-hero-lunar");
         if (hero) {
-          hero.textContent = (dt.getMonth() + 1) + "月" + dt.getDate() + "日，星期" + WEEKDAYS_FULL[dt.getDay()];
+          hero.textContent = new Intl.DateTimeFormat(lang === "en" ? "en-US" : "zh-CN", {
+            month: "long", day: "numeric", weekday: "long"
+          }).format(dt);
         }
         if (lunar) {
           var HERO_LUNAR = { "2026-11-05": "九月廿七", "2026-11-07": "立冬", "2026-11-09": "十月", "2026-11-22": "小雪" };
@@ -1622,7 +1835,9 @@
         }
         var axis = $("cal-axis-heading");
         if (axis) {
-          axis.textContent = (dt.getMonth() + 1) + "月" + dt.getDate() + "日 · 日视图 07:00–22:00 · " +
+          axis.textContent = new Intl.DateTimeFormat(lang === "en" ? "en-US" : "zh-CN", {
+            month: "short", day: "numeric"
+          }).format(dt) + " · " + t("dayView") + " 07:00–22:00 · " +
             zoneLabel(calTz) + " " + tzOffsetLabel(calTz);
         }
       }
@@ -1638,14 +1853,15 @@
         if (calViewMode === "months") {
           grid.classList.add("hidden");
           if (picker) picker.classList.remove("hidden");
-          title.textContent = y + "年";
-          title.title = "点选年份";
+          title.textContent = String(y);
+          title.title = t("pickYear");
           var parts = [];
           for (var m = 0; m < 12; m++) {
             var on = (y === 2026 && m === 10) || (y === calMonth.getFullYear() && m === calMonth.getMonth() && calSelected.indexOf(ymd(y, m, 1).slice(0, 7)) === 0);
             // highlight current cursor month
             on = (m === m0);
-            parts.push('<button type="button" class="cal-picker-cell' + (on ? " on" : "") + '" data-pick-month="' + m + '">' + MONTH_NAMES[m] + "</button>");
+            var monthLabel = lang === "en" ? ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"][m] : MONTH_NAMES[m];
+            parts.push('<button type="button" class="cal-picker-cell' + (on ? " on" : "") + '" data-pick-month="' + m + '">' + monthLabel + "</button>");
           }
           if (picker) picker.innerHTML = parts.join("");
           return;
@@ -1655,8 +1871,8 @@
           grid.classList.add("hidden");
           if (picker) picker.classList.remove("hidden");
           var start = Math.floor(y / 10) * 10;
-          title.textContent = start + "年 – " + (start + 9) + "年";
-          title.title = "返回选月";
+          title.textContent = start + " – " + (start + 9);
+          title.title = t("backMonths");
           var parts = [];
           for (var yy = start - 1; yy <= start + 10; yy++) {
             var cls = "cal-picker-cell";
@@ -1671,15 +1887,18 @@
         // days
         grid.classList.remove("hidden");
         if (picker) { picker.classList.add("hidden"); picker.innerHTML = ""; }
-        title.textContent = y + "年" + (m0 + 1) + "月";
-        title.title = "点选月份 / 年份";
+        title.textContent = lang === "en"
+          ? new Intl.DateTimeFormat("en-US", { month: "long", year: "numeric" }).format(calMonth)
+          : y + "年" + (m0 + 1) + "月";
+        title.title = t("pickMonth");
         var first = new Date(y, m0, 1);
         var startPad = (first.getDay() + 6) % 7;
         var daysInMonth = new Date(y, m0 + 1, 0).getDate();
         var prevDays = new Date(y, m0, 0).getDate();
         var todayStr = todayYmd();
         var parts = [];
-        WEEKDAYS_MON.forEach(function (d) {
+        var dows = lang === "en" ? ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"] : WEEKDAYS_MON;
+        dows.forEach(function (d) {
           parts.push('<div class="cal-dow">' + d + "</div>");
         });
         var cells = [];
@@ -1737,7 +1956,7 @@
           parts.push('<div class="cal-hour-label">' + pad2(h) + ":00</div>");
           parts.push('<div class="cal-hour-slot">');
           if (!slotEvs.length) {
-            parts.push('<button type="button" class="cal-empty-slot" data-cal-write="' + h + '">写入</button>');
+            parts.push('<button type="button" class="cal-empty-slot" data-cal-write="' + h + '">' + t("write") + "</button>");
           } else {
             slotEvs.forEach(function (e) {
               var urg = e.urgency || "normal";
@@ -1748,13 +1967,13 @@
               parts.push('<div class="cal-evt-time">' + e.start + "–" + e.end + "</div></div>");
               parts.push('<div class="cal-evt-actions">');
               parts.push('<button type="button" class="sm" data-cal-act="done" data-eid="' + e.id + '">' +
-                (e.done ? "撤销" : "完成") + "</button>");
+                (e.done ? t("undo") : t("done")) + "</button>");
               parts.push('<button type="button" class="sm danger" data-cal-act="remove" data-eid="' + e.id + '">删</button>');
               parts.push("</div></div>");
               parts.push('<div class="cal-evt-meta">');
-              parts.push('<span class="cal-tag ' + e.track + '">' + (e.track === "team" ? "团队" : "本地") + "</span>");
+              parts.push('<span class="cal-tag ' + e.track + '">' + (e.track === "team" ? t("team") : t("local")) + "</span>");
               parts.push('<button type="button" class="cal-tag urg-' + urg + '" data-cal-act="urg" data-eid="' + e.id + '">' +
-                (URGENCY_LABEL[urg] || urg) + "</button>");
+                (t("urg_" + urg) || urg) + "</button>");
               if (e.location) parts.push("<span>📍 " + e.location + "</span>");
               if (e.remind) parts.push("<span>🔔 " + e.remind + "</span>");
               if (e.note) parts.push("<span>" + e.note + "</span>");
@@ -1792,17 +2011,15 @@
         var mem = $("nav-members");
         if (mem) {
           mem.disabled = !isAdmin;
-          mem.title = isAdmin ? "" : "需要 admin";
+          mem.title = isAdmin ? "" : t("needAdminNav");
         }
         var ann = $("nav-announce");
-        if (ann) { ann.disabled = false; ann.title = isAdmin ? "可管理公告" : "只读公告"; }
+        if (ann) { ann.disabled = false; ann.title = isAdmin ? t("annManage") : t("annRead"); }
         var usage = $("nav-usage");
         if (usage) { usage.disabled = false; usage.title = ""; }
         var calNav = $("nav-calendar");
         if (calNav) { calNav.disabled = false; calNav.title = ""; }
-        $("nav-hint").textContent = isAdmin
-          ? "admin：成员管理 + 公告发布（mock）"
-          : "member：用量/日历/公告只读；成员管理需 admin";
+        $("nav-hint").textContent = isAdmin ? t("hintAdmin") : t("hintMember");
       }
 
       function esc(value) {
@@ -1812,10 +2029,10 @@
           .replace(/>/g, "&gt;");
       }
       function fmt(n) {
-        return Number(n || 0).toLocaleString("zh-CN");
+        return Number(n || 0).toLocaleString(lang === "en" ? "en-US" : "zh-CN");
       }
       function usageTable(columns, rows, empty) {
-        if (!rows || !rows.length) return '<div class="announce-empty">' + empty + "</div>";
+        if (!rows || !rows.length) return '<div class="announce-empty">' + (empty || t("empty")) + "</div>";
         return "<table><thead><tr>" + columns.map(function (col) {
           return "<th>" + esc(col.label) + "</th>";
         }).join("") + "</tr></thead><tbody>" + rows.map(function (row) {
@@ -1836,36 +2053,37 @@
         set(isAdmin ? "usage-month" : "usage-month-member", fmt(month));
         set(isAdmin ? "usage-calls" : "usage-calls-member", fmt(calls));
         var accountCols = [
-          { label: "用户", value: function (row) { return row.user; } },
-          { label: "今日 token", value: function (row) { return fmt(row.today); } },
-          { label: "本月 token", value: function (row) { return fmt(row.month); } },
-          { label: "本月调用", value: function (row) { return fmt(row.callsMonth); } }
+          { label: t("user"), value: function (row) { return row.user; } },
+          { label: t("colToday"), value: function (row) { return fmt(row.today); } },
+          { label: t("colMonth"), value: function (row) { return fmt(row.month); } },
+          { label: t("colCalls"), value: function (row) { return fmt(row.callsMonth); } }
         ];
         var dayCols = [
-          { label: "日期", value: function (row) { return row.day; } },
-          { label: "用户", value: function (row) { return row.user; } },
-          { label: "token", value: function (row) { return fmt(row.tokens); } },
-          { label: "调用", value: function (row) { return fmt(row.calls); } }
+          { label: t("colDate"), value: function (row) { return row.day; } },
+          { label: t("user"), value: function (row) { return row.user; } },
+          { label: t("colToken"), value: function (row) { return fmt(row.tokens); } },
+          { label: t("colCall"), value: function (row) { return fmt(row.calls); } }
         ];
         var callCols = [
-          { label: "时间", value: function (row) { return (row.at || "").replace("T", " ").slice(0, 16); } },
-          { label: "用户", value: function (row) { return row.user; } },
-          { label: "模型", value: function (row) { return row.model || "—"; } },
-          { label: "token", value: function (row) { return fmt(row.tokens); } }
+          { label: t("colTime"), value: function (row) { return (row.at || "").replace("T", " ").slice(0, 16); } },
+          { label: t("user"), value: function (row) { return row.user; } },
+          { label: t("colModel"), value: function (row) { return row.model || "—"; } },
+          { label: t("colToken"), value: function (row) { return fmt(row.tokens); } }
         ];
         var rows = report && report.rows || [];
         var days = report && report.days || [];
         var recent = report && report.calls || [];
         var team = $("usage-team");
         var mine = $("usage-mine");
-        if (team) team.innerHTML = usageTable(accountCols, rows, "暂无记录");
-        if (mine) mine.innerHTML = usageTable(accountCols, rows, "暂无记录");
+        if (team) team.innerHTML = usageTable(accountCols, rows, t("empty"));
+        if (mine) mine.innerHTML = usageTable(accountCols, rows, t("empty"));
         var dayHost = $(isAdmin ? "usage-days" : "usage-days-member");
         var callHost = $(isAdmin ? "usage-recent" : "usage-recent-member");
-        if (dayHost) dayHost.innerHTML = usageTable(dayCols, days, "暂无记录");
-        if (callHost) callHost.innerHTML = usageTable(callCols, recent, "暂无记录");
+        if (dayHost) dayHost.innerHTML = usageTable(dayCols, days, t("empty"));
+        if (callHost) callHost.innerHTML = usageTable(callCols, recent, t("empty"));
+        lastUsage = report;
         var lede = $("usage-lede");
-        if (lede) lede.textContent = "按账号汇总座位会话中的 token · 今日 / 本月（上海时区）· 不含金额";
+        if (lede) lede.textContent = t("usageLede");
       }
       function loadUsage() {
         var session = readSession();
@@ -1874,17 +2092,18 @@
           .then(function (report) {
             if (!report) {
               var lede = $("usage-lede");
-              if (lede) lede.textContent = "用量暂时读不到";
+              if (lede) lede.textContent = t("usageFail");
               return;
             }
             paintUsage(report, session && session.role === "admin");
           })
           .catch(function () {
             var lede = $("usage-lede");
-            if (lede) lede.textContent = "用量暂时读不到";
+            if (lede) lede.textContent = t("usageFail");
           });
       }
       function render() {
+        applyI18n();
         var session = readSession();
         var loginCard = $("login-card");
         var appCard = $("app-card");
@@ -1923,7 +2142,7 @@
         $("usage-hist-admin-calls").classList.toggle("hidden", !isAdmin);
         $("usage-hist-member").classList.toggle("hidden", isAdmin);
         $("usage-hist-member-calls").classList.toggle("hidden", isAdmin);
-        $("usage-lede").textContent = remote ? "正在汇总座位会话…" : "本地演示不读取会话用量";
+        $("usage-lede").textContent = remote ? t("usageLoading") : t("usageLocal");
         setAdminNav(isAdmin);
         if (remote) loadUsage();
         renderMembers();
@@ -1950,7 +2169,7 @@
           }).then(function (res) {
             if (btn) btn.disabled = false;
             if (!res.ok || !res.body.session) {
-              $("login-err").textContent = "用户未知或密码错误";
+              $("login-err").textContent = t("badLogin");
               sessionCache = null;
               render();
               return;
@@ -1960,7 +2179,7 @@
             return hydrateState().then(function () { render(); watchBoot(); });
           }).catch(function () {
             if (btn) btn.disabled = false;
-            $("login-err").textContent = "门户暂时连不上";
+            $("login-err").textContent = t("portalDown");
           });
           return;
         }
@@ -2010,13 +2229,13 @@
         var s = readSession();
         var el = $(targetId);
         if (!s || !s.role) {
-          el.innerHTML = '<span class="no">拒绝 · 无角色</span>';
+          el.innerHTML = '<span class="no">' + t("denyRole") + "</span>";
           return;
         }
         if (s.role === "admin") {
-          el.innerHTML = '<span class="ok">允许 · admin</span>';
+          el.innerHTML = '<span class="ok">' + t("allowAdmin") + "</span>";
         } else {
-          el.innerHTML = '<span class="no">拒绝 · ' + s.role + '</span>';
+          el.innerHTML = '<span class="no">' + t("denyRoleName", { role: s.role }) + "</span>";
         }
       }
 
@@ -2024,13 +2243,13 @@
         var s = readSession();
         var el = $(targetId);
         if (!s || !s.role) {
-          el.innerHTML = '<span class="no">拒绝 · 无角色</span>';
+          el.innerHTML = '<span class="no">' + t("denyRole") + "</span>";
           return;
         }
         if (s.role === "admin" || s.role === "member") {
-          el.innerHTML = '<span class="ok">允许 · ' + s.role + '</span>';
+          el.innerHTML = '<span class="ok">' + t("allowRole", { role: s.role }) + "</span>";
         } else {
-          el.innerHTML = '<span class="no">拒绝 · ' + s.role + '</span>';
+          el.innerHTML = '<span class="no">' + t("denyRoleName", { role: s.role }) + "</span>";
         }
       }
 
@@ -2045,14 +2264,14 @@
       }
       function changePassword() {
         var session = readSession();
-        if (!session || !session.user) { setPasswordNote("请先登录"); return; }
+        if (!session || !session.user) { setPasswordNote(t("pwLogin")); return; }
         var current = ($("pw-current") && $("pw-current").value) || "";
         var next = ($("pw-next") && $("pw-next").value) || "";
         var again = ($("pw-next2") && $("pw-next2").value) || "";
-        if (!current || !next) { setPasswordNote("请填写当前密码和新密码"); return; }
-        if (next !== again) { setPasswordNote("两次新密码不一致"); return; }
+        if (!current || !next) { setPasswordNote(t("pwNeed")); return; }
+        if (next !== again) { setPasswordNote(t("pwMismatch")); return; }
         if (next.length < 4 || next.length > 64 || /\s/.test(next)) {
-          setPasswordNote("新密码需要 4–64 位，且不能包含空格");
+          setPasswordNote(t("pwRule"));
           return;
         }
         if (remote) {
@@ -2074,10 +2293,10 @@
             $("pw-current").value = "";
             $("pw-next").value = "";
             $("pw-next2").value = "";
-            setPasswordNote("已修改。下次请用新密码登录");
+            setPasswordNote(t("pwOk"));
           }).catch(function () {
             if (btn) btn.disabled = false;
-            setPasswordNote("门户暂时连不上");
+            setPasswordNote(t("pwDown"));
           });
           return;
         }
@@ -2088,14 +2307,14 @@
         }
         var stored = readPasswords()[user];
         var actual = stored || (acct && acct.password) || "";
-        if (!acct || actual !== current) { setPasswordNote("当前密码不正确"); return; }
+        if (!acct || actual !== current) { setPasswordNote(t("pwBad")); return; }
         var map = readPasswords();
         map[user] = next;
         localStorage.setItem(PASS_KEY, JSON.stringify(map));
         $("pw-current").value = "";
         $("pw-next").value = "";
         $("pw-next2").value = "";
-        setPasswordNote("已修改。下次请用新密码登录");
+        setPasswordNote(t("pwOk"));
       }
       $("btn-change-password").addEventListener("click", changePassword);
       $("btn-logout").addEventListener("click", logout);
@@ -2128,15 +2347,15 @@
             .then(function () {
               renderMembers();
               watchBoot();
-              setMemberNote("已重置，并重新拉取 admin001");
+              setMemberNote(t("resetOk"));
             })
-            .catch(function () { setMemberNote("重置失败"); });
+            .catch(function () { setMemberNote(t("resetFail")); });
           return;
         }
         localStorage.removeItem(MEMBERS_KEY);
         pullAdmin001();
         renderMembers();
-        setMemberNote("已重置，并重新拉取 admin001");
+        setMemberNote(t("resetOk"));
       });
       $("members-tbody").addEventListener("click", function (e) {
         var btn = e.target.closest("button[data-act]");
@@ -2173,7 +2392,7 @@
         var sel = $("cal-tz");
         if (!sel) return;
         sel.innerHTML = CAL_ZONES.map(function (z) {
-          return '<option value="' + z.id + '">' + z.label + " " + tzOffsetLabel(z.id) + "</option>";
+          return '<option value="' + z.id + '">' + zoneLabel(z.id) + " " + tzOffsetLabel(z.id) + "</option>";
         }).join("");
         sel.value = calTz;
       }
@@ -2302,26 +2521,27 @@
         pendingUpdate = "";
         if (!result || !choice) return;
         choice.classList.add("hidden");
+        lastUpdate = info;
         if (!info || info.error) {
-          result.textContent = "连不上 GitHub";
+          result.textContent = t("updFail");
           return;
         }
         if (info.current) PORTAL_VERSION = info.current;
         var current = $("update-current");
-        if (current) current.textContent = "当前版本 " + PORTAL_VERSION;
+        if (current) current.textContent = t("updCurrent", { v: PORTAL_VERSION });
         if (!info.update) {
-          result.textContent = "已是最新，当前 " + PORTAL_VERSION;
+          result.textContent = t("updLatest", { v: PORTAL_VERSION });
           return;
         }
         pendingUpdate = info.latest;
-        result.textContent = "发现新版本 " + info.latest + "，当前 " + PORTAL_VERSION;
+        result.textContent = t("updFound", { latest: info.latest, v: PORTAL_VERSION });
         choice.classList.remove("hidden");
       }
       function checkUpdate() {
         var btn = $("btn-check-update");
         var result = $("update-result");
         if (btn) btn.disabled = true;
-        if (result) result.textContent = "正在检查…";
+        if (result) result.textContent = t("updChecking");
         var done = function (info) {
           if (btn) btn.disabled = false;
           showUpdate(info);
@@ -2346,22 +2566,22 @@
         var choice = $("update-choice");
         var result = $("update-result");
         if (choice) choice.classList.add("hidden");
-        if (result) result.textContent = "已保留当前版本 " + PORTAL_VERSION;
+        if (result) result.textContent = t("updKeep", { v: PORTAL_VERSION });
       }
       function upgrade() {
         if (!pendingUpdate) return;
         var choice = $("update-choice");
         var result = $("update-result");
         if (!remote) {
-          if (result) result.textContent = "本地演示不能安装更新";
+          if (result) result.textContent = t("updLocal");
           return;
         }
         if (!sessionCache || sessionCache.role !== "admin") {
-          if (result) result.textContent = "需要管理员才能升级";
+          if (result) result.textContent = t("updAdmin");
           return;
         }
         if (choice) choice.classList.add("hidden");
-        if (result) result.textContent = "正在安装 " + pendingUpdate + "…";
+        if (result) result.textContent = t("updInstalling", { v: pendingUpdate });
         fetch(API + "/update", {
           method: "POST",
           credentials: "same-origin",
@@ -2371,14 +2591,14 @@
           return r.json().then(function (body) { return { ok: r.ok, body: body }; });
         }).then(function (res) {
           if (!res.ok) {
-            if (result) result.textContent = (res.body && res.body.message) || "升级没有完成";
+            if (result) result.textContent = (res.body && res.body.message) || t("updFailed");
             if (choice) choice.classList.remove("hidden");
             return;
           }
           pendingUpdate = "";
           if (result) result.textContent = res.body.message || "已安装。重启实例后才会换成新版本。";
         }).catch(function () {
-          if (result) result.textContent = "升级没有完成";
+          if (result) result.textContent = t("updFailed");
           if (choice) choice.classList.remove("hidden");
         });
       }
@@ -2409,7 +2629,7 @@
             return hydrateState().then(function () { render(); watchBoot(); });
           })
           .catch(function () {
-            $("login-err").textContent = "门户暂时连不上";
+            $("login-err").textContent = t("portalDown");
             render();
           });
       } else {
