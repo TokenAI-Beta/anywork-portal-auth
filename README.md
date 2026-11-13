@@ -32,7 +32,7 @@ demo/index.html
 
 ```sh
 npm pack
-dsh plugin --profile web add ./anywork-portal-auth-0.2.30.tgz
+dsh plugin --profile web add ./anywork-portal-auth-0.2.31.tgz
 ```
 
 `--profile` 写在子命令前面。装上或卸下之后重启实例。重启后门户出现在 `/plugins/anywork-portal-auth/`，并拉起 `admin001` 的实例（mock 端口 `3301`）。

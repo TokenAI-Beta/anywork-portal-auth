@@ -587,7 +587,6 @@
             <div class="logo">T AI</div>
             <div>
               <div class="title">TokenAI门户</div>
-              <div class="sub" data-i18n="portalSub">demo mock · 非现网</div>
             </div>
           </div>
           <div class="who">
@@ -785,7 +784,6 @@
 
             <div id="tab-calendar" class="hidden">
               <h2 data-i18n="navCalendar">日历</h2>
-              <p class="lede" data-i18n="calLede">系统月历视觉 + dsh-auto-memory 日轴（点日期展开）</p>
               <div class="cal-shell">
                 <div class="cal-hero">
                   <div>
@@ -891,7 +889,7 @@
       };
 
       var remote = window.__ANYWORK_PORTAL_REMOTE__ === true;
-      var PORTAL_VERSION = window.__ANYWORK_PORTAL_VERSION__ || "0.2.30";
+      var PORTAL_VERSION = window.__ANYWORK_PORTAL_VERSION__ || "0.2.31";
       var GITHUB_URL = window.__ANYWORK_PORTAL_GITHUB__ || "https://github.com/TokenAI-Beta/anywork-portal-auth";
       var pendingUpdate = "";
       var API = "/plugins/anywork-portal-auth";
@@ -906,7 +904,7 @@
       var lastUpdate = null;
       var I18N = {
         zh: {
-          loginTitle: "成员登录", portalSub: "demo mock · 非现网", username: "用户名", password: "密码", signIn: "登录", signOut: "登出",
+          loginTitle: "成员登录", username: "用户名", password: "密码", signIn: "登录", signOut: "登出",
           navOverview: "总览", navMembers: "成员", navUsage: "用量", navAnnounce: "公告", navCalendar: "日历", navApi: "API接口",
           pwTitle: "修改登录密码", pwLede: "只能修改当前登录账号。新注册成员的初始密码是 member。",
           pwCurrent: "当前密码", pwNext: "新密码", pwAgain: "再输入一次", save: "保存",
@@ -930,7 +928,6 @@
           dailyMine: "历史记录 · 按日汇总（我的）", callsMine: "历史记录 · 按次（我的最近）",
           title: "标题", body: "正文（mock，不写现网）", pin: "置顶", unpin: "取消置顶", publish: "发布公告", del: "删除",
           annNote: "member 只读；admin 可管理。localStorage 持久，可重置。",
-          calLede: "系统月历视觉 + dsh-auto-memory 日轴（点日期展开）",
           toggleAxis: "展开/收起日轴", tzTitle: "时区，可不选", prevMonth: "上月", nextMonth: "下月", todayBtn: "今天",
           all: "全部", local: "本地", team: "团队",
           urg_critical: "紧急·重要", urg_high: "紧急·次要", urg_normal: "普通", urg_low: "低优",
@@ -978,7 +975,7 @@
           seatLine: "{up} 在线 · {idle} 空闲 · {off} 未开/启动"
         },
         en: {
-          loginTitle: "Member sign in", portalSub: "demo mock · not production", username: "Username", password: "Password", signIn: "Sign in", signOut: "Sign out",
+          loginTitle: "Member sign in", username: "Username", password: "Password", signIn: "Sign in", signOut: "Sign out",
           navOverview: "Overview", navMembers: "Members", navUsage: "Usage", navAnnounce: "Notices", navCalendar: "Calendar", navApi: "API",
           pwTitle: "Change password", pwLede: "You can change only the account you are signed in as. New members start with password member.",
           pwCurrent: "Current password", pwNext: "New password", pwAgain: "Repeat new password", save: "Save",
@@ -1002,7 +999,6 @@
           dailyMine: "History · by day (mine)", callsMine: "History · by call (mine, recent)",
           title: "Title", body: "Body (mock, not production)", pin: "Pin", unpin: "Unpin", publish: "Publish", del: "Delete",
           annNote: "Members can read. Admins can manage. Stored in this browser.",
-          calLede: "Month calendar plus a day axis (open a date).",
           toggleAxis: "Show or hide the day axis", tzTitle: "Time zone, optional", prevMonth: "Previous month", nextMonth: "Next month", todayBtn: "Today",
           all: "All", local: "Local", team: "Team",
           urg_critical: "Urgent · important", urg_high: "Urgent · minor", urg_normal: "Normal", urg_low: "Low",

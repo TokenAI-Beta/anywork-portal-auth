@@ -1,6 +1,6 @@
 {
   "name": "anywork-portal-auth",
-  "version": "0.2.30",
+  "version": "0.2.31",
   "private": false,
   "description": "Anywork 门户登录。安装并重启后出现登录门户，并拉起 admin001。",
   "license": "MIT",
