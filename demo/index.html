@@ -725,7 +725,6 @@
 
             <div id="tab-usage" class="hidden">
               <h2 data-i18n="usageTitle">工作台用量</h2>
-              <p class="lede" id="usage-lede">按账号汇总座位会话中的 token</p>
               <div class="stats" id="usage-stats-admin">
                 <div class="stat"><div class="k" data-i18n="today">今日</div><div class="v" id="usage-today">0</div><div class="s">token</div></div>
                 <div class="stat"><div class="k" data-i18n="thisMonth">本月</div><div class="v" id="usage-month">0</div><div class="s">token</div></div>
@@ -889,7 +888,7 @@
       };
 
       var remote = window.__ANYWORK_PORTAL_REMOTE__ === true;
-      var PORTAL_VERSION = window.__ANYWORK_PORTAL_VERSION__ || "0.2.31";
+      var PORTAL_VERSION = window.__ANYWORK_PORTAL_VERSION__ || "0.2.32";
       var GITHUB_URL = window.__ANYWORK_PORTAL_GITHUB__ || "https://github.com/TokenAI-Beta/anywork-portal-auth";
       var pendingUpdate = "";
       var API = "/plugins/anywork-portal-auth";
@@ -942,8 +941,6 @@
           openSeat: "开座位", stopSeat: "停实例", deleteSeat: "删账号+实例",
           empty: "暂无记录", colToday: "今日 token", colMonth: "本月 token", colCalls: "本月调用",
           colDate: "日期", colToken: "token", colCall: "调用", colTime: "时间", colModel: "模型",
-          usageLede: "按账号汇总座位会话中的 token · 今日 / 本月（上海时区）· 不含金额",
-          usageLoading: "正在汇总座位会话…", usageLocal: "本地演示不读取会话用量", usageFail: "用量暂时读不到",
           needAdminNav: "需要 admin", annManage: "可管理公告", annRead: "只读公告",
           hintAdmin: "admin：成员管理 + 公告发布（mock）",
           hintMember: "member：用量/日历/公告只读；成员管理需 admin",
@@ -1013,8 +1010,6 @@
           openSeat: "Open seat", stopSeat: "Stop", deleteSeat: "Delete account",
           empty: "No records", colToday: "Today tokens", colMonth: "Month tokens", colCalls: "Calls this month",
           colDate: "Date", colToken: "tokens", colCall: "Calls", colTime: "Time", colModel: "Model",
-          usageLede: "Tokens from each account's seat sessions · today / this month (Shanghai) · cost not included",
-          usageLoading: "Adding up seat sessions…", usageLocal: "The local demo does not read session usage", usageFail: "Usage is unavailable",
           needAdminNav: "Admin required", annManage: "Can manage notices", annRead: "Read-only notices",
           hintAdmin: "admin: member admin and notices (mock)",
           hintMember: "member: usage, calendar, and notices are read-only; member admin requires an admin",
@@ -2078,25 +2073,16 @@
         if (dayHost) dayHost.innerHTML = usageTable(dayCols, days, t("empty"));
         if (callHost) callHost.innerHTML = usageTable(callCols, recent, t("empty"));
         lastUsage = report;
-        var lede = $("usage-lede");
-        if (lede) lede.textContent = t("usageLede");
       }
       function loadUsage() {
         var session = readSession();
         fetch(API + "/usage", { credentials: "same-origin", cache: "no-store" })
           .then(function (r) { return r.ok ? r.json() : null; })
           .then(function (report) {
-            if (!report) {
-              var lede = $("usage-lede");
-              if (lede) lede.textContent = t("usageFail");
-              return;
-            }
+            if (!report) return;
             paintUsage(report, session && session.role === "admin");
           })
-          .catch(function () {
-            var lede = $("usage-lede");
-            if (lede) lede.textContent = t("usageFail");
-          });
+          .catch(function () {});
       }
       function render() {
         applyI18n();
@@ -2138,7 +2124,6 @@
         $("usage-hist-admin-calls").classList.toggle("hidden", !isAdmin);
         $("usage-hist-member").classList.toggle("hidden", isAdmin);
         $("usage-hist-member-calls").classList.toggle("hidden", isAdmin);
-        $("usage-lede").textContent = remote ? t("usageLoading") : t("usageLocal");
         setAdminNav(isAdmin);
         if (remote) loadUsage();
         renderMembers();
