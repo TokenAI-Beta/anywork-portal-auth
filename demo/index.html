@@ -627,10 +627,10 @@
               <div id="overview-admin">
                 <h2 data-i18n="adminOverview">管理总览</h2>
                 <div class="stats" id="overview-stats">
-                  <div class="stat"><div class="k" data-i18n="seats">座位</div><div class="v" id="ov-seat-total">5</div><div class="s" id="ov-seat-sub">4 在线 · 1 停用</div></div>
+                  <div class="stat"><div class="k" data-i18n="seats">座位</div><div class="v" id="ov-seat-total">0</div><div class="s" id="ov-seat-sub">0</div></div>
                   <div class="stat"><div class="k" data-i18n="monthUsage">本月用量</div><div class="v" id="ov-usage-month">0</div><div class="s">token</div></div>
-                  <div class="stat"><div class="k" data-i18n="seatHealth">座位健康</div><div class="v" id="ov-health-v">4/5</div><div class="s" id="ov-health-s">在线 · mock</div></div>
-                  <div class="stat"><div class="k" data-i18n="navAnnounce">公告</div><div class="v" id="ov-ann-v">3</div><div class="s" id="ov-ann-s">1 置顶</div></div>
+                  <div class="stat"><div class="k" data-i18n="seatHealth">座位健康</div><div class="v" id="ov-health-v">0/0</div><div class="s" id="ov-health-s">0</div></div>
+                  <div class="stat"><div class="k" data-i18n="navAnnounce">公告</div><div class="v" id="ov-ann-v">0</div><div class="s" id="ov-ann-s">0</div></div>
                 </div>
                 <div class="ov-stat-note" id="ov-stat-note" data-i18n="ovNote">座位 / 公告数字跟成员页与公告板联动（mock）</div>
 
@@ -888,7 +888,7 @@
       };
 
       var remote = window.__ANYWORK_PORTAL_REMOTE__ === true;
-      var PORTAL_VERSION = window.__ANYWORK_PORTAL_VERSION__ || "0.2.32";
+      var PORTAL_VERSION = window.__ANYWORK_PORTAL_VERSION__ || "0.2.33";
       var GITHUB_URL = window.__ANYWORK_PORTAL_GITHUB__ || "https://github.com/TokenAI-Beta/anywork-portal-auth";
       var pendingUpdate = "";
       var API = "/plugins/anywork-portal-auth";
@@ -1504,7 +1504,7 @@
         var up = list.filter(function (m) { return m.seat === "up"; }).length;
         var idle = list.filter(function (m) { return m.seat === "idle"; }).length;
         var off = list.filter(function (m) { return m.seat === "off" || m.seat === "booting"; }).length;
-        var t = $("ov-seat-total"); if (t) t.textContent = String(total);
+        var seatTotal = $("ov-seat-total"); if (seatTotal) seatTotal.textContent = String(total);
         var sub = $("ov-seat-sub"); if (sub) sub.textContent = t("seatLine", { up: up, idle: idle, off: off });
         var hv = $("ov-health-v"); if (hv) hv.textContent = up + "/" + (total || 1);
         var hs = $("ov-health-s"); if (hs) hs.textContent = t("healthSub");
