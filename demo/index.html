@@ -238,6 +238,10 @@
       width: auto; min-width: 140px; padding: 8px 10px; font-size: 0.84rem;
     }
     .members-note { margin-top: 10px; font-size: 0.75rem; color: var(--faint); }
+    .budget-edit { display: inline-flex; align-items: center; gap: 6px; }
+    .budget-edit input {
+      width: 64px; min-width: 0; padding: 6px 8px; font-size: 0.84rem;
+    }
 
     .charts {
       display: grid; grid-template-columns: 1.4fr 1fr; gap: 12px; margin-bottom: 4px;
@@ -888,7 +892,7 @@
       };
 
       var remote = window.__ANYWORK_PORTAL_REMOTE__ === true;
-      var PORTAL_VERSION = window.__ANYWORK_PORTAL_VERSION__ || "0.2.33";
+      var PORTAL_VERSION = window.__ANYWORK_PORTAL_VERSION__ || "0.2.34";
       var GITHUB_URL = window.__ANYWORK_PORTAL_GITHUB__ || "https://github.com/TokenAI-Beta/anywork-portal-auth";
       var pendingUpdate = "";
       var API = "/plugins/anywork-portal-auth";
@@ -920,6 +924,7 @@
           memberAdmin: "成员管理", memberAdminLede: "开座位 / 删实例 · mock（仅本页状态，不写库）",
           newUser: "新用户名", register: "注册成员", refreshSeats: "刷新座位状态", resetList: "重置列表",
           seatState: "座位状态", port: "端口", budget: "预算", actions: "操作",
+          adjustBudget: "调整额度", budgetSaved: "已把 {name} 的额度改为 {n}%", budgetBad: "额度需为 0–100 的整数",
           memberNote: "未开 → 启动中 → 已开（假端口）。删账号会一并清实例。",
           usageTitle: "工作台用量", monthCalls: "本月调用", times: "次", cost: "费用", seeConsole: "见各家控制台",
           teamDetail: "团队明细", myDetail: "我的明细",
@@ -989,6 +994,7 @@
           memberAdmin: "Members", memberAdminLede: "Open a seat or remove an instance · mock (this page only)",
           newUser: "New username", register: "Add member", refreshSeats: "Refresh seats", resetList: "Reset list",
           seatState: "Seat", port: "Port", budget: "Budget", actions: "Actions",
+          adjustBudget: "Set quota", budgetSaved: "Set {name}'s quota to {n}%", budgetBad: "Quota must be a whole number from 0 to 100",
           memberNote: "Off → starting → on (fake port). Deleting an account also clears its instance.",
           usageTitle: "Workbench usage", monthCalls: "Calls this month", times: "calls", cost: "Cost", seeConsole: "See each provider",
           teamDetail: "Team", myDetail: "Mine",
@@ -1226,6 +1232,34 @@
         if (seat === "idle") return '<span class="tag wait">' + t("seatIdle") + "</span>";
         return '<span class="tag off">' + t("seatOff") + "</span>";
       }
+      function budgetNumber(value) {
+        var n = parseInt(String(value == null ? "" : value).replace("%", ""), 10);
+        if (!isFinite(n)) return null;
+        return n;
+      }
+      function budgetCell(member) {
+        if (member.role === "admin") return esc(member.budget || "—");
+        var current = budgetNumber(member.budget);
+        if (current == null || current < 0) current = 0;
+        if (current > 100) current = 100;
+        return '<span class="budget-edit">' +
+          '<input type="number" min="0" max="100" step="1" value="' + current + '" data-budget-for="' + esc(member.id) + '" aria-label="' + esc(t("adjustBudget")) + '" />' +
+          "<span>%</span>" +
+          '<button type="button" class="sm" data-act="budget" data-id="' + esc(member.id) + '">' + t("adjustBudget") + "</button>" +
+          "</span>";
+      }
+      function setBudget(id) {
+        var field = document.querySelector('input[data-budget-for="' + id.replace(/"/g, "") + '"]');
+        var n = budgetNumber(field && field.value);
+        if (n == null || n < 0 || n > 100) { setMemberNote(t("budgetBad")); return; }
+        var list = loadMembers();
+        var member = list.find(function (x) { return x.id === id; });
+        if (!member || member.role === "admin") return;
+        member.budget = String(n) + "%";
+        saveMembers(list);
+        renderMembers();
+        setMemberNote(t("budgetSaved", { name: id, n: n }));
+      }
       function renderMembers() {
         var tbody = $("members-tbody");
         if (!tbody) return;
@@ -1254,7 +1288,7 @@
             '<td>' + m.role + '</td>' +
             '<td>' + seatTag(m.seat) + '</td>' +
             '<td>' + port + '</td>' +
-            '<td>' + (m.budget || "—") + '</td>' +
+            '<td>' + budgetCell(m) + '</td>' +
             '<td>' + actions + '</td>' +
             '</tr>';
         }).join("");
@@ -2346,6 +2380,7 @@
         if (act === "boot") bootSeat(id);
         else if (act === "stop") stopSeat(id);
         else if (act === "delete") deleteMember(id);
+        else if (act === "budget") setBudget(id);
       });
 
 
