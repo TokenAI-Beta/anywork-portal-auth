@@ -32,7 +32,7 @@ demo/index.html
 
 ```sh
 npm pack
-dsh plugin --profile web add ./anywork-portal-auth-0.2.34.tgz
+dsh plugin --profile web add ./anywork-portal-auth-0.2.35.tgz
 ```
 
 `--profile` 写在子命令前面。装上或卸下之后重启实例。重启后门户出现在 `/plugins/anywork-portal-auth/`，并拉起 `admin001` 的实例（mock 端口 `3301`）。
@@ -52,6 +52,7 @@ dsh plugin --profile web remove anywork-portal-auth
 - 「进入工作台」mock（不跳座位端口）+ 返回门户
 - 日历：月历（农历/节气）· 点日下方 07–22 日轴写入 · 紧急色/完成删/本地|团队 · 点月标题跳选年月 · 时区可选（默认跟随本机）。不带示例事件
 - 用量：按门户账号汇总该座位会话里模型返回的 token。今日 / 本月按上海时区。不含各家控制台的金额
+- 成员额度：管理员给子账号设本月积分，1 积分等于 1 个已统计 token。额度为 0 或本月用满后，工作台不能再发消息。管理员不设额度
 
 ## 包骨架
 

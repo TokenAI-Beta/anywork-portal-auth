@@ -240,7 +240,7 @@
     .members-note { margin-top: 10px; font-size: 0.75rem; color: var(--faint); }
     .budget-edit { display: inline-flex; align-items: center; gap: 6px; }
     .budget-edit input {
-      width: 64px; min-width: 0; padding: 6px 8px; font-size: 0.84rem;
+      width: 7.5rem; min-width: 0; padding: 6px 8px; font-size: 0.84rem;
     }
 
     .charts {
@@ -892,7 +892,7 @@
       };
 
       var remote = window.__ANYWORK_PORTAL_REMOTE__ === true;
-      var PORTAL_VERSION = window.__ANYWORK_PORTAL_VERSION__ || "0.2.34";
+      var PORTAL_VERSION = window.__ANYWORK_PORTAL_VERSION__ || "0.2.35";
       var GITHUB_URL = window.__ANYWORK_PORTAL_GITHUB__ || "https://github.com/TokenAI-Beta/anywork-portal-auth";
       var pendingUpdate = "";
       var API = "/plugins/anywork-portal-auth";
@@ -923,8 +923,8 @@
           update: "更新", currentVersion: "当前版本", checkUpdate: "检查更新", upgrade: "升级", skipUpgrade: "不升级",
           memberAdmin: "成员管理", memberAdminLede: "开座位 / 删实例 · mock（仅本页状态，不写库）",
           newUser: "新用户名", register: "注册成员", refreshSeats: "刷新座位状态", resetList: "重置列表",
-          seatState: "座位状态", port: "端口", budget: "预算", actions: "操作",
-          adjustBudget: "调整额度", budgetSaved: "已把 {name} 的额度改为 {n}%", budgetBad: "额度需为 0–100 的整数",
+          seatState: "座位状态", port: "端口", budget: "已用 / 额度", actions: "操作",
+          adjustBudget: "调整额度", budgetSaved: "已把 {name} 的本月额度改为 {n} 积分", budgetBad: "额度需为大于等于 0 的整数",
           memberNote: "未开 → 启动中 → 已开（假端口）。删账号会一并清实例。",
           usageTitle: "工作台用量", monthCalls: "本月调用", times: "次", cost: "费用", seeConsole: "见各家控制台",
           teamDetail: "团队明细", myDetail: "我的明细",
@@ -993,8 +993,8 @@
           update: "Update", currentVersion: "Current version", checkUpdate: "Check for updates", upgrade: "Upgrade", skipUpgrade: "Not now",
           memberAdmin: "Members", memberAdminLede: "Open a seat or remove an instance · mock (this page only)",
           newUser: "New username", register: "Add member", refreshSeats: "Refresh seats", resetList: "Reset list",
-          seatState: "Seat", port: "Port", budget: "Budget", actions: "Actions",
-          adjustBudget: "Set quota", budgetSaved: "Set {name}'s quota to {n}%", budgetBad: "Quota must be a whole number from 0 to 100",
+          seatState: "Seat", port: "Port", budget: "Used / quota", actions: "Actions",
+          adjustBudget: "Set quota", budgetSaved: "Set {name}'s monthly quota to {n} points", budgetBad: "Quota must be a whole number of 0 or more",
           memberNote: "Off → starting → on (fake port). Deleting an account also clears its instance.",
           usageTitle: "Workbench usage", monthCalls: "Calls this month", times: "calls", cost: "Cost", seeConsole: "See each provider",
           teamDetail: "Team", myDetail: "Mine",
@@ -1232,33 +1232,45 @@
         if (seat === "idle") return '<span class="tag wait">' + t("seatIdle") + "</span>";
         return '<span class="tag off">' + t("seatOff") + "</span>";
       }
+      var QUOTA_MAX = 1000000000000;
       function budgetNumber(value) {
-        var n = parseInt(String(value == null ? "" : value).replace("%", ""), 10);
+        var raw = String(value == null ? "" : value).trim().replace(/%/g, "");
+        if (!raw || raw === "—") return null;
+        if (!/^\d+$/.test(raw)) return null;
+        var n = Number(raw);
         if (!isFinite(n)) return null;
         return n;
       }
+      function monthUsedOf(id) {
+        var rows = lastUsage && lastUsage.rows || [];
+        for (var i = 0; i < rows.length; i++) {
+          if (rows[i].user === id) return Number(rows[i].month) || 0;
+        }
+        return 0;
+      }
       function budgetCell(member) {
-        if (member.role === "admin") return esc(member.budget || "—");
+        if (member.role === "admin") return "—";
         var current = budgetNumber(member.budget);
         if (current == null || current < 0) current = 0;
-        if (current > 100) current = 100;
+        if (current > QUOTA_MAX) current = QUOTA_MAX;
         return '<span class="budget-edit">' +
-          '<input type="number" min="0" max="100" step="1" value="' + current + '" data-budget-for="' + esc(member.id) + '" aria-label="' + esc(t("adjustBudget")) + '" />' +
-          "<span>%</span>" +
+          '<span class="mono" data-used-for="' + esc(member.id) + '">' + fmt(monthUsedOf(member.id)) + "</span>" +
+          "<span>/</span>" +
+          '<input type="number" min="0" step="1" value="' + current + '" data-budget-for="' + esc(member.id) + '" aria-label="' + esc(t("adjustBudget")) + '" />' +
           '<button type="button" class="sm" data-act="budget" data-id="' + esc(member.id) + '">' + t("adjustBudget") + "</button>" +
           "</span>";
       }
       function setBudget(id) {
         var field = document.querySelector('input[data-budget-for="' + id.replace(/"/g, "") + '"]');
         var n = budgetNumber(field && field.value);
-        if (n == null || n < 0 || n > 100) { setMemberNote(t("budgetBad")); return; }
+        if (n == null || n < 0 || n > QUOTA_MAX) { setMemberNote(t("budgetBad")); return; }
         var list = loadMembers();
         var member = list.find(function (x) { return x.id === id; });
         if (!member || member.role === "admin") return;
-        member.budget = String(n) + "%";
+        member.budget = String(n);
         saveMembers(list);
         renderMembers();
-        setMemberNote(t("budgetSaved", { name: id, n: n }));
+        setMemberNote(t("budgetSaved", { name: id, n: fmt(n) }));
       }
       function renderMembers() {
         var tbody = $("members-tbody");
@@ -1401,7 +1413,7 @@
           setMemberNote(t("exists", { name: name }));
           return;
         }
-        list.push({ id: name, role: "member", budget: "0%", seat: "off", port: null });
+        list.push({ id: name, role: "member", budget: "0", seat: "off", port: null });
         saveMembers(list);
         input.value = "";
         renderMembers();
@@ -2027,7 +2039,10 @@
           b.classList.toggle("active", b.getAttribute("data-tab") === name);
         });
         if (name === "calendar") renderCalendar();
-        if (name === "members") renderMembers();
+        if (name === "members") {
+          renderMembers();
+          if (remote) loadUsage();
+        }
         if (name === "announce") renderAnnouncements();
         if (name === "overview") renderOverviewFromMembers();
       }
@@ -2107,6 +2122,12 @@
         if (dayHost) dayHost.innerHTML = usageTable(dayCols, days, t("empty"));
         if (callHost) callHost.innerHTML = usageTable(callCols, recent, t("empty"));
         lastUsage = report;
+        paintMemberUsage();
+      }
+      function paintMemberUsage() {
+        document.querySelectorAll("[data-used-for]").forEach(function (el) {
+          el.textContent = fmt(monthUsedOf(el.getAttribute("data-used-for")));
+        });
       }
       function loadUsage() {
         var session = readSession();
