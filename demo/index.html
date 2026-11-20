@@ -974,7 +974,7 @@
       };
 
       var remote = window.__ANYWORK_PORTAL_REMOTE__ === true;
-      var PORTAL_VERSION = window.__ANYWORK_PORTAL_VERSION__ || "0.2.37";
+      var PORTAL_VERSION = window.__ANYWORK_PORTAL_VERSION__ || "0.2.38";
       var GITHUB_URL = window.__ANYWORK_PORTAL_GITHUB__ || "https://github.com/TokenAI-Beta/anywork-portal-auth";
       var pendingUpdate = "";
       var API = "/plugins/anywork-portal-auth";
@@ -2741,6 +2741,12 @@
         if (foot) foot.textContent = "anywork-portal-auth · desk_session";
         var sub = document.querySelector("#app-card .sub");
         if (sub) sub.textContent = "进入工作台将打开anywork";
+        if (window.__ANYWORK_SESSION__) {
+          sessionCache = window.__ANYWORK_SESSION__;
+          render();
+          hydrateState().then(function () { render(); watchBoot(); }).catch(function () {});
+          return;
+        }
         fetch(API + "/session", { credentials: "same-origin", cache: "no-store" })
           .then(function (r) { return r.json(); })
           .then(function (body) {
